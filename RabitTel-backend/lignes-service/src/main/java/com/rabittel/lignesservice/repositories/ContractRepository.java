@@ -16,7 +16,7 @@ import java.util.UUID;
 public interface ContractRepository extends JpaRepository<Contract, UUID>, JpaSpecificationExecutor<Contract> {
     List<Contract> findByStatus(ContractStatus status);
 
-    @Query("SELECT c FROM Contract c WHERE c.endDate < :thresholdDate AND c.status = 'ACTIVE'")
+    @Query("SELECT c FROM Contract c WHERE c.endDate < :thresholdDate AND c.status = 'IN_PROGRESS' OR c.status = 'RENEWED'")
     List<Contract> findContractsExpiringBefore(@Param("thresholdDate") LocalDate thresholdDate);
 
     @Query("SELECT c FROM Contract c WHERE c.startDate >= :startDate AND c.endDate <= :endDate")
