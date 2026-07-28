@@ -43,49 +43,46 @@ public class FTTHLineService {
         return ftthLineMapper.toFTTHLineResponseDTO(savedLine);
     }
 
-    public FTTHLineResponseDTO updateFTTHLine(UUID id, FTTHLineUpdateRequestDTO updateRequestDTO) {
+    public FTTHLineResponseDTO updateFTTHLine(UUID id, FTTHLineUpdateRequestDTO dto) {
+
         FTTHLine ftthLine = ftthLineRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("FTTH Line with id " + id + " not found."));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("FTTH Line not found")
+                );
 
-        ftthLineMapper.updateEntityFromDto(updateRequestDTO, ftthLine);
 
-        if (updateRequestDTO.getLineNumber() != null && !updateRequestDTO.getLineNumber().equals(ftthLine.getLineNumber())
-            && ftthLineRepository.existsByLineNumber(updateRequestDTO.getLineNumber())) {
-            throw new ResourceAlreadyExistsException("FTTH Line with number " + updateRequestDTO.getLineNumber() + " already exists.");
-        }
+        if(dto.getLineNumber()!=null
+                && !dto.getLineNumber().equals(ftthLine.getLineNumber())
+                && ftthLineRepository.existsByLineNumber(dto.getLineNumber())) {
 
-        if (updateRequestDTO.getFixedLineNumber() != null && !updateRequestDTO.getFixedLineNumber().equals(ftthLine.getFixedLineNumber())
-            && ftthLineRepository.existsByFixedLineNumber(updateRequestDTO.getFixedLineNumber())) {
-            throw new ResourceAlreadyExistsException("Fixed line number " + updateRequestDTO.getFixedLineNumber() + " already exists.");
-        }
-
-        if (updateRequestDTO.getAgencyId() != null) {
-            var agency = agencyRepository.findById(updateRequestDTO.getAgencyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Agency with id " + updateRequestDTO.getAgencyId() + " not found."));
-            ftthLine.setAgency(agency);
-        }
-        if (updateRequestDTO.getPlanId() != null) {
-            var plan = planRepository.findById(updateRequestDTO.getPlanId())
-                .orElseThrow(() -> new ResourceNotFoundException("Plan with id " + updateRequestDTO.getPlanId() + " not found."));
-            ftthLine.setPlan(plan);
-        }
-        if (updateRequestDTO.getContractId() != null) {
-            var contract = contractRepository.findById(updateRequestDTO.getContractId())
-                .orElseThrow(() -> new ResourceNotFoundException("Contract with id " + updateRequestDTO.getContractId() + " not found."));
-            ftthLine.setContract(contract);
-        }
-        if (updateRequestDTO.getCreatedBy() != null) {
-            ftthLine.setCreatedBy(updateRequestDTO.getCreatedBy());
+            throw new ResourceAlreadyExistsException(
+                    "Line number already exists"
+            );
         }
 
-        FTTHLine updatedLine = ftthLineRepository.save(ftthLine);
-        return ftthLineMapper.toFTTHLineResponseDTO(updatedLine);
+
+        if(dto.getFixedLineNumber()!=null
+                && !dto.getFixedLineNumber().equals(ftthLine.getFixedLineNumber())
+                && ftthLineRepository.existsByFixedLineNumber(dto.getFixedLineNumber())) {
+
+            throw new ResourceAlreadyExistsException(
+                    "Fixed number already exists"
+            );
+        }
+
+
+        ftthLineMapper.updateEntityFromDto(dto, ftthLine);
+
+
+        return ftthLineMapper.toFTTHLineResponseDTO(
+                ftthLineRepository.save(ftthLine)
+        );
     }
 
     public void terminatedFTTHLine(UUID id) {
         FTTHLine ftthLine = ftthLineRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("FTTH Line with id " + id + " not found."));
-        if (ftthLine.getLineStatus() != null && ftthLine.getLineStatus().equals(LineStatus.ACTIVE)) {
+        if(LineStatus.ACTIVE.equals(ftthLine.getLineStatus())){
             ftthLine.setLineStatus(LineStatus.TERMINATED);
             ftthLineRepository.save(ftthLine);
         }
@@ -127,9 +124,15 @@ public class FTTHLineService {
     }
 
     public List<FTTHLineResponseDTO> getAllBillableFTTHLines(){
-        List<FTTHLineResponseDTO> ftthLines = getAllFTTHLinesByStatus(LineStatus.ACTIVE);
-        ftthLines.addAll(getAllFTTHLinesByStatus(LineStatus.SUSPENDED));
-        return ftthLines;
+        List<LineStatus> statuses =
+                List.of(
+                        LineStatus.ACTIVE,
+                        LineStatus.SUSPENDED
+                );
+        List<FTTHLine> ftthLines = ftthLineRepository.findByLineStatusIn(statuses);
+        return ftthLines.stream()
+                .map(ftthLineMapper::toFTTHLineResponseDTO)
+                .collect(Collectors.toList());
     }
 
     public List<FTTHLineResponseDTO> searchFTTHLines(String lineNumber, LineStatus lineStatus,

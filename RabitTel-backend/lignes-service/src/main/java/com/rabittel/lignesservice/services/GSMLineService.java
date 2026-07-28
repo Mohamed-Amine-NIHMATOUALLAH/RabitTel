@@ -54,6 +54,18 @@ public class GSMLineService {
             throw new ResourceAlreadyExistsException("Chip serial number " + updateRequestDTO.getChipSerialNumber() + " already exists.");
         }
 
+        if(updateRequestDTO.getLineNumber() != null
+                && !updateRequestDTO.getLineNumber()
+                .equals(gsmLine.getLineNumber())
+                && gsmLineRepository.existsByLineNumber(updateRequestDTO.getLineNumber())) {
+
+            throw new ResourceAlreadyExistsException(
+                    "GSM Line with number "
+                            + updateRequestDTO.getLineNumber()
+                            + " already exists."
+            );
+        }
+
         // map simple fields
         gsmLineMapper.updateEntityFromDto(updateRequestDTO, gsmLine);
 
@@ -74,10 +86,7 @@ public class GSMLineService {
             gsmLine.setContract(contract);
         }
 
-        // createdBy
-        if (updateRequestDTO.getCreatedBy() != null) {
-            gsmLine.setCreatedBy(updateRequestDTO.getCreatedBy());
-        }
+
 
         GSMLine updatedLine = gsmLineRepository.save(gsmLine);
         return gsmLineMapper.toGSMLineResponseDTO(updatedLine);
@@ -86,7 +95,9 @@ public class GSMLineService {
     public void terminatedGSMLine(UUID id) {
         GSMLine gsmLine = gsmLineRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("GSM Line with id " + id + " not found."));
-        if (gsmLine.getLineStatus() != null ) {
+        if(LineStatus.ACTIVE.equals(gsmLine.getLineStatus())
+                || LineStatus.SUSPENDED.equals(gsmLine.getLineStatus())) {
+
             gsmLine.setLineStatus(LineStatus.TERMINATED);
             gsmLineRepository.save(gsmLine);
         }
@@ -109,9 +120,17 @@ public class GSMLineService {
     }
 
     public List<GSMLineResponseDTO> getAllBillableGSMLines(){
-        List<GSMLineResponseDTO> gsmLines = getAllGSMLinesByStatus(LineStatus.ACTIVE);
-        gsmLines.addAll(getAllGSMLinesByStatus(LineStatus.SUSPENDED));
-        return gsmLines;
+
+        return gsmLineRepository
+                .findByLineStatusIn(
+                        List.of(
+                                LineStatus.ACTIVE,
+                                LineStatus.SUSPENDED
+                        )
+                )
+                .stream()
+                .map(gsmLineMapper::toGSMLineResponseDTO)
+                .toList();
     }
 
 

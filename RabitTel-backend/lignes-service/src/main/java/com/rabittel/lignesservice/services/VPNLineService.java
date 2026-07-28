@@ -9,6 +9,8 @@ import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.VPNLineMapper;
 import com.rabittel.lignesservice.repositories.VPNLineRepository;
+import com.rabittel.lignesservice.specifications.LineSpecification;
+import com.rabittel.lignesservice.specifications.VPNLineSpecification;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -41,52 +43,101 @@ public class VPNLineService {
     }
 
     public VPNLineResponseDTO updateVPNLine(UUID id, VPNLineUpdateRequestDTO updateRequestDTO) {
-        VPNLine vpnLine = vpnLineRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("VPN Line with id " + id + " not found."));
 
-        // ip uniqueness
-        if (updateRequestDTO.getIpAddress() != null
-            && !updateRequestDTO.getIpAddress().equals(vpnLine.getIpAddress())
-            && vpnLineRepository.existsByIpAddress(updateRequestDTO.getIpAddress())) {
-            throw new ResourceAlreadyExistsException("IP address " + updateRequestDTO.getIpAddress() + " already exists.");
+        VPNLine vpnLine = vpnLineRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "VPN Line with id " + id + " not found."
+                ));
+
+        // Vérification de l'unicité du numéro de ligne
+        if (updateRequestDTO.getLineNumber() != null
+                && !updateRequestDTO.getLineNumber().equals(vpnLine.getLineNumber())
+                && vpnLineRepository.existsByLineNumber(updateRequestDTO.getLineNumber())) {
+
+            throw new ResourceAlreadyExistsException(
+                    "VPN Line with number "
+                            + updateRequestDTO.getLineNumber()
+                            + " already exists."
+            );
         }
 
+        // Vérification de l'unicité de l'adresse IP
+        if (updateRequestDTO.getIpAddress() != null
+                && !updateRequestDTO.getIpAddress().equals(vpnLine.getIpAddress())
+                && vpnLineRepository.existsByIpAddress(updateRequestDTO.getIpAddress())) {
+
+            throw new ResourceAlreadyExistsException(
+                    "IP address "
+                            + updateRequestDTO.getIpAddress()
+                            + " already exists."
+            );
+        }
+
+        // Mise à jour des champs simples
         vpnLineMapper.updateEntityFromDto(updateRequestDTO, vpnLine);
 
-        if (updateRequestDTO.getLineNumber() != null && !updateRequestDTO.getLineNumber().equals(vpnLine.getLineNumber())
-            && vpnLineRepository.existsByLineNumber(updateRequestDTO.getLineNumber())) {
-            throw new ResourceAlreadyExistsException("VPN Line with number " + updateRequestDTO.getLineNumber() + " already exists.");
-        }
-
+        // Mise à jour des relations
         if (updateRequestDTO.getAgencyId() != null) {
             var agency = agencyRepository.findById(updateRequestDTO.getAgencyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Agency with id " + updateRequestDTO.getAgencyId() + " not found."));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Agency with id " + updateRequestDTO.getAgencyId() + " not found."
+                    ));
             vpnLine.setAgency(agency);
         }
+
         if (updateRequestDTO.getPlanId() != null) {
             var plan = planRepository.findById(updateRequestDTO.getPlanId())
-                .orElseThrow(() -> new ResourceNotFoundException("Plan with id " + updateRequestDTO.getPlanId() + " not found."));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Plan with id " + updateRequestDTO.getPlanId() + " not found."
+                    ));
             vpnLine.setPlan(plan);
         }
+
         if (updateRequestDTO.getContractId() != null) {
             var contract = contractRepository.findById(updateRequestDTO.getContractId())
-                .orElseThrow(() -> new ResourceNotFoundException("Contract with id " + updateRequestDTO.getContractId() + " not found."));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Contract with id " + updateRequestDTO.getContractId() + " not found."
+                    ));
             vpnLine.setContract(contract);
         }
+
         if (updateRequestDTO.getCreatedBy() != null) {
             vpnLine.setCreatedBy(updateRequestDTO.getCreatedBy());
         }
 
         VPNLine updatedLine = vpnLineRepository.save(vpnLine);
+
         return vpnLineMapper.toVPNLineResponseDTO(updatedLine);
     }
 
-    public void deleteVPNLine(UUID id) {
+
+    public void terminatedVPNLine(UUID id) {
+
         VPNLine vpnLine = vpnLineRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("VPN Line with id " + id + " not found."));
-        if (vpnLine.getLineStatus() != null && vpnLine.getLineStatus().equals(LineStatus.ACTIVE)) {
-            throw new IllegalStateException("Cannot delete an active VPN Line.");
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "VPN Line with id " + id + " not found."
+                ));
+
+        if (LineStatus.ACTIVE.equals(vpnLine.getLineStatus())) {
+            vpnLine.setLineStatus(LineStatus.TERMINATED);
+            vpnLineRepository.save(vpnLine);
         }
+    }
+
+
+    public void deleteVPNLine(UUID id) {
+
+        VPNLine vpnLine = vpnLineRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "VPN Line with id " + id + " not found."
+                ));
+
+        if (LineStatus.ACTIVE.equals(vpnLine.getLineStatus())) {
+            throw new IllegalStateException(
+                    "Cannot delete an active VPN Line."
+            );
+        }
+
         vpnLineRepository.delete(vpnLine);
     }
 
@@ -120,12 +171,17 @@ public class VPNLineService {
         return vpnLines;
     }
 
-    public List<VPNLineResponseDTO> searchVPNLines(String lineNumber, LineStatus lineStatus, String bandwidth, String ipAddress) {
+    public List<VPNLineResponseDTO> searchVPNLines(
+            String lineNumber,
+            LineStatus lineStatus,
+            String bandwidth,
+            String ipAddress) {
+
         Specification<VPNLine> spec = Specification
-                .<VPNLine>where(hasLineNumber(lineNumber))
-                .and(hasLineStatus(lineStatus))
-                .and(hasBandwidth(bandwidth))
-                .and(hasIpAddress(ipAddress));
+                .<VPNLine>where(LineSpecification.hasLineNumber(lineNumber))
+                .and(LineSpecification.hasLineStatus(lineStatus))
+                .and(VPNLineSpecification.hasBandwidth(bandwidth))
+                .and(VPNLineSpecification.hasIpAddress(ipAddress));
 
         return vpnLineRepository.findAll(spec).stream()
                 .map(vpnLineMapper::toVPNLineResponseDTO)

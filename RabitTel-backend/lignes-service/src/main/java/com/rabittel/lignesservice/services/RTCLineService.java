@@ -38,54 +38,85 @@ public class RTCLineService {
     }
 
     public RTCLineResponseDTO updateRTCLine(UUID id, RTCLineUpdateRequestDTO updateRequestDTO) {
-        RTCLine rtcLine = rtcLineRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("RTC Line with id " + id + " not found."));
 
+        RTCLine rtcLine = rtcLineRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "RTC Line with id " + id + " not found."
+                ));
+
+        // Vérification de l'unicité du numéro avant le mapper
+        if (updateRequestDTO.getLineNumber() != null
+                && !updateRequestDTO.getLineNumber().equals(rtcLine.getLineNumber())
+                && rtcLineRepository.existsByLineNumber(updateRequestDTO.getLineNumber())) {
+
+            throw new ResourceAlreadyExistsException(
+                    "RTC Line with number "
+                            + updateRequestDTO.getLineNumber()
+                            + " already exists."
+            );
+        }
+
+        // Mise à jour des champs simples
         rtcLineMapper.updateEntityFromDto(updateRequestDTO, rtcLine);
 
-        if (updateRequestDTO.getLineNumber() != null && !updateRequestDTO.getLineNumber().equals(rtcLine.getLineNumber())
-            && rtcLineRepository.existsByLineNumber(updateRequestDTO.getLineNumber())) {
-            throw new ResourceAlreadyExistsException("RTC Line with number " + updateRequestDTO.getLineNumber() + " already exists.");
-        }
-
+        // Mise à jour des relations
         if (updateRequestDTO.getAgencyId() != null) {
             var agency = agencyRepository.findById(updateRequestDTO.getAgencyId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Agency with id " + updateRequestDTO.getAgencyId() + " not found."));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Agency with id " + updateRequestDTO.getAgencyId() + " not found."
+                    ));
             rtcLine.setAgency(agency);
         }
+
         if (updateRequestDTO.getPlanId() != null) {
             var plan = planRepository.findById(updateRequestDTO.getPlanId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Plan with id " + updateRequestDTO.getPlanId() + " not found."));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Plan with id " + updateRequestDTO.getPlanId() + " not found."
+                    ));
             rtcLine.setPlan(plan);
         }
+
         if (updateRequestDTO.getContractId() != null) {
             var contract = contractRepository.findById(updateRequestDTO.getContractId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Contract with id " + updateRequestDTO.getContractId() + " not found."));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Contract with id " + updateRequestDTO.getContractId() + " not found."
+                    ));
             rtcLine.setContract(contract);
         }
-        if (updateRequestDTO.getCreatedBy() != null) {
-            rtcLine.setCreatedBy(updateRequestDTO.getCreatedBy());
-        }
+
 
         RTCLine updatedLine = rtcLineRepository.save(rtcLine);
+
         return rtcLineMapper.toRTCLineResponseDTO(updatedLine);
     }
 
+
     public void terminatedRTCLine(UUID id) {
+
         RTCLine rtcLine = rtcLineRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("RTC Line with id " + id + " not found."));
-        if (rtcLine.getLineStatus() != null && rtcLine.getLineStatus().equals(LineStatus.ACTIVE)) {
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "RTC Line with id " + id + " not found."
+                ));
+
+        if (LineStatus.ACTIVE.equals(rtcLine.getLineStatus())) {
             rtcLine.setLineStatus(LineStatus.TERMINATED);
             rtcLineRepository.save(rtcLine);
         }
     }
 
     public void deleteRTCLine(UUID id) {
+
         RTCLine rtcLine = rtcLineRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("RTC Line with id " + id + " not found."));
-        if (rtcLine.getLineStatus() != null && rtcLine.getLineStatus().equals(LineStatus.ACTIVE)) {
-            throw new IllegalStateException("Cannot delete an active RTC Line.");
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "RTC Line with id " + id + " not found."
+                ));
+
+        if (LineStatus.ACTIVE.equals(rtcLine.getLineStatus())) {
+            throw new IllegalStateException(
+                    "Cannot delete an active RTC Line."
+            );
         }
+
         rtcLineRepository.delete(rtcLine);
     }
 

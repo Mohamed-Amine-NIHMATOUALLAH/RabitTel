@@ -5,15 +5,18 @@ import com.rabittel.lignesservice.dtos.request.ContractRequestDTO.ContractRenewa
 import com.rabittel.lignesservice.dtos.response.ContractResponseDTO;
 import com.rabittel.lignesservice.entities.Contract;
 import com.rabittel.lignesservice.enums.ContractStatus;
+import com.rabittel.lignesservice.exceptions.BusinessRuleException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.ContractMapper;
 import com.rabittel.lignesservice.repositories.ContractRepository;
 import com.rabittel.lignesservice.specifications.ContractSpecification;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -23,14 +26,25 @@ import java.util.stream.Collectors;
 public class ContractService {
     private final ContractRepository contractRepository;
     private final ContractMapper contractMapper;
+    private static final int MAX_CONTRACT_DURATION_MONTHS = 120;
 
     public ContractResponseDTO createContract(ContractCreateRequestDTO contractCreateRequestDTO) {
         if (contractCreateRequestDTO.getStartDate() == null) {
-            throw new IllegalArgumentException("Start date cannot be null");
+            throw new BusinessRuleException("Start date cannot be null");
         }
 
         if (contractCreateRequestDTO.getDurationMonths() == null || contractCreateRequestDTO.getDurationMonths() < 1) {
-            throw new IllegalArgumentException("Duration must be at least 1 month");
+            throw new BusinessRuleException("Duration must be at least 1 month");
+        }
+
+        if (contractCreateRequestDTO.getDurationMonths() > MAX_CONTRACT_DURATION_MONTHS) {
+            throw new BusinessRuleException(
+                    "Contract duration cannot exceed " + MAX_CONTRACT_DURATION_MONTHS + " months.");
+        }
+
+        if(contractCreateRequestDTO.getStartDate().isBefore(LocalDate.now())){
+            throw new BusinessRuleException(
+                    "Contract start date cannot be in the past.");
         }
 
         Contract contract = contractMapper.toEntity(contractCreateRequestDTO);
@@ -43,15 +57,29 @@ public class ContractService {
     }
 
     public ContractResponseDTO renewContract(UUID id, ContractRenewalRequestDTO renewalRequestDTO) {
-        Contract contract = contractRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Contract with id " + id + " not found."));
+        Contract contract = findContractById(id);
 
         if (renewalRequestDTO.getNewDurationMonths() == null || renewalRequestDTO.getNewDurationMonths() < 1) {
-            throw new IllegalArgumentException("Duration must be at least 1 month");
+            throw new BusinessRuleException("Duration must be at least 1 month");
+        }
+        if (renewalRequestDTO.getNewDurationMonths() > MAX_CONTRACT_DURATION_MONTHS) {
+            throw new BusinessRuleException(
+                    "Contract duration cannot exceed " + MAX_CONTRACT_DURATION_MONTHS + " months.");
         }
 
-        contract.setDurationMonths(renewalRequestDTO.getNewDurationMonths());
-        LocalDate newEndDate = contract.getStartDate().plusMonths(renewalRequestDTO.getNewDurationMonths());
+        LocalDate newStartDate = contract.getEndDate();
+
+        contract.setStartDate(newStartDate);
+
+        contract.setDurationMonths(
+                renewalRequestDTO.getNewDurationMonths()
+        );
+
+        LocalDate newEndDate =
+                newStartDate.plusMonths(
+                        renewalRequestDTO.getNewDurationMonths()
+                );
+
         contract.setEndDate(newEndDate);
 
         if (contract.getEndDate().isBefore(LocalDate.now())) {
@@ -65,12 +93,17 @@ public class ContractService {
     }
 
     public void deleteContract(UUID id) {
-        Contract contract = contractRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Contract with id " + id + " not found."));
+        Contract contract = findContractById(id);
 
         if (contract.getLines() != null && !contract.getLines().isEmpty()) {
-            throw new IllegalStateException(
+            throw new BusinessRuleException(
                 "Cannot delete contract with associated lines - delete or transfer lines first");
+        }
+        if (contract.getStatus() == ContractStatus.IN_PROGRESS
+                || contract.getStatus() == ContractStatus.RENEWED) {
+
+            throw new BusinessRuleException(
+                    "Cannot delete an active contract.");
         }
 
         contractRepository.delete(contract);
@@ -83,8 +116,7 @@ public class ContractService {
     }
 
     public ContractResponseDTO getContractById(UUID id) {
-        Contract contract = contractRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Contract with id " + id + " not found."));
+        Contract contract = findContractById(id);
         return contractMapper.toContractResponseDTO(contract);
     }
 
@@ -101,10 +133,15 @@ public class ContractService {
     }
 
     public List<ContractResponseDTO> getExpiredContracts() {
+
         return getContractsByStatus(ContractStatus.EXPIRED);
     }
 
     public List<ContractResponseDTO> getExpiringContracts(int daysThreshold) {
+        if(daysThreshold < 0){
+            throw new BusinessRuleException(
+                    "Days threshold cannot be negative.");
+        }
         LocalDate thresholdDate = LocalDate.now().plusDays(daysThreshold);
         return contractRepository.findContractsExpiringBefore(thresholdDate).stream()
             .map(contractMapper::toContractResponseDTO)
@@ -112,6 +149,10 @@ public class ContractService {
     }
 
     public List<ContractResponseDTO> getContractsByDateRange(LocalDate startDate, LocalDate endDate) {
+        if(startDate.isAfter(endDate)){
+            throw new BusinessRuleException(
+                    "Start date cannot be after end date.");
+        }
         return contractRepository.findContractsByDateRange(startDate, endDate).stream()
             .map(contractMapper::toContractResponseDTO)
             .collect(Collectors.toList());
@@ -132,14 +173,31 @@ public class ContractService {
     }
 
     public boolean isContractExpired(UUID contractId) {
-        Contract contract = contractRepository.findById(contractId)
-            .orElseThrow(() -> new ResourceNotFoundException("Contract with id " + contractId + " not found."));
-        return contract.getEndDate().isBefore(LocalDate.now());
+        Contract contract = findContractById(contractId);
+        return !contract.getEndDate().isAfter(LocalDate.now());
     }
 
-    public int getDaysUntilExpiration(UUID contractId) {
-        Contract contract = contractRepository.findById(contractId)
-            .orElseThrow(() -> new ResourceNotFoundException("Contract with id " + contractId + " not found."));
-        return (int) java.time.temporal.ChronoUnit.DAYS.between(LocalDate.now(), contract.getEndDate());
+    public Long getDaysUntilExpiration(UUID contractId) {
+        Contract contract = findContractById(contractId);
+        return ChronoUnit.DAYS.between(
+                LocalDate.now(),
+                contract.getEndDate());
+    }
+
+    private Contract findContractById(UUID id) {
+        return contractRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Contract with id " + id + " not found."));
+    }
+
+    @Transactional
+    public void updateExpiredContracts(){
+
+        int updated =
+                contractRepository.updateExpiredContracts();
+
+        System.out.println(
+                updated + " contracts expired"
+        );
     }
 }
