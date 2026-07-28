@@ -47,59 +47,98 @@ public class VPN4GLineService {
     }
 
     public VPN4GLineResponseDTO updateVPN4GLine(UUID id, VPN4GLineUpdateRequestDTO updateRequestDTO) {
+
         VPN4GLine vpn4GLine = vpn4GLineRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("VPN 4G Line with id " + id + " not found."));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "VPN 4G Line with id " + id + " not found."
+                ));
 
+        // Vérification de l'unicité du numéro de ligne
+        if (updateRequestDTO.getLineNumber() != null
+                && !updateRequestDTO.getLineNumber().equals(vpn4GLine.getLineNumber())
+                && vpn4GLineRepository.existsByLineNumber(updateRequestDTO.getLineNumber())) {
 
+            throw new ResourceAlreadyExistsException(
+                    "VPN 4G Line with number "
+                            + updateRequestDTO.getLineNumber()
+                            + " already exists."
+            );
+        }
 
+        // Vérification de l'unicité de l'adresse IP
         if (updateRequestDTO.getIpAddress() != null
-            && !updateRequestDTO.getIpAddress().equals(vpn4GLine.getIpAddress())
-            && vpn4GLineRepository.existsByIpAddress(updateRequestDTO.getIpAddress())) {
-            throw new ResourceAlreadyExistsException("IP address " + updateRequestDTO.getIpAddress() + " already exists.");
+                && !updateRequestDTO.getIpAddress().equals(vpn4GLine.getIpAddress())
+                && vpn4GLineRepository.existsByIpAddress(updateRequestDTO.getIpAddress())) {
+
+            throw new ResourceAlreadyExistsException(
+                    "IP address "
+                            + updateRequestDTO.getIpAddress()
+                            + " already exists."
+            );
         }
 
+        // Vérification de l'unicité du numéro de série
         if (updateRequestDTO.getSerialNumber() != null
-            && !updateRequestDTO.getSerialNumber().equals(vpn4GLine.getSerialNumber())
-            && vpn4GLineRepository.existsBySerialNumber(updateRequestDTO.getSerialNumber())) {
-            throw new ResourceAlreadyExistsException("Serial number " + updateRequestDTO.getSerialNumber() + " already exists.");
+                && !updateRequestDTO.getSerialNumber().equals(vpn4GLine.getSerialNumber())
+                && vpn4GLineRepository.existsBySerialNumber(updateRequestDTO.getSerialNumber())) {
+
+            throw new ResourceAlreadyExistsException(
+                    "Serial number "
+                            + updateRequestDTO.getSerialNumber()
+                            + " already exists."
+            );
         }
 
+        // Mise à jour des champs simples
         vpn4GLineMapper.updateEntityFromDto(updateRequestDTO, vpn4GLine);
 
-        if (updateRequestDTO.getLineNumber() != null && !updateRequestDTO.getLineNumber().equals(vpn4GLine.getLineNumber())
-            && vpn4GLineRepository.existsByLineNumber(updateRequestDTO.getLineNumber())) {
-            throw new ResourceAlreadyExistsException("VPN 4G Line with number " + updateRequestDTO.getLineNumber() + " already exists.");
-        }
-
+        // Mise à jour des relations
         if (updateRequestDTO.getAgencyId() != null) {
             var agency = agencyRepository.findById(updateRequestDTO.getAgencyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Agency with id " + updateRequestDTO.getAgencyId() + " not found."));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Agency with id " + updateRequestDTO.getAgencyId() + " not found."
+                    ));
             vpn4GLine.setAgency(agency);
         }
+
         if (updateRequestDTO.getPlanId() != null) {
             var plan = planRepository.findById(updateRequestDTO.getPlanId())
-                .orElseThrow(() -> new ResourceNotFoundException("Plan with id " + updateRequestDTO.getPlanId() + " not found."));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Plan with id " + updateRequestDTO.getPlanId() + " not found."
+                    ));
             vpn4GLine.setPlan(plan);
         }
+
         if (updateRequestDTO.getContractId() != null) {
             var contract = contractRepository.findById(updateRequestDTO.getContractId())
-                .orElseThrow(() -> new ResourceNotFoundException("Contract with id " + updateRequestDTO.getContractId() + " not found."));
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Contract with id " + updateRequestDTO.getContractId() + " not found."
+                    ));
             vpn4GLine.setContract(contract);
         }
+
         if (updateRequestDTO.getCreatedBy() != null) {
             vpn4GLine.setCreatedBy(updateRequestDTO.getCreatedBy());
         }
 
         VPN4GLine updatedLine = vpn4GLineRepository.save(vpn4GLine);
+
         return vpn4GLineMapper.toVPN4GLineResponseDTO(updatedLine);
     }
 
     public void deleteVPN4GLine(UUID id) {
+
         VPN4GLine vpn4GLine = vpn4GLineRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("VPN 4G Line with id " + id + " not found."));
-        if (vpn4GLine.getLineStatus() != null && vpn4GLine.getLineStatus().equals(LineStatus.ACTIVE)) {
-            throw new IllegalStateException("Cannot delete an active VPN 4G Line.");
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "VPN 4G Line with id " + id + " not found."
+                ));
+
+        if (LineStatus.ACTIVE.equals(vpn4GLine.getLineStatus())) {
+            throw new IllegalStateException(
+                    "Cannot delete an active VPN 4G Line."
+            );
         }
+
         vpn4GLineRepository.delete(vpn4GLine);
     }
 
@@ -147,5 +186,18 @@ public class VPN4GLineService {
         return vpn4GLineRepository.findAll(spec).stream()
                 .map(vpn4GLineMapper::toVPN4GLineResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    public void terminatedVPN4GLine(UUID id) {
+
+        VPN4GLine vpn4GLine = vpn4GLineRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "VPN 4G Line with id " + id + " not found."
+                ));
+
+        if (LineStatus.ACTIVE.equals(vpn4GLine.getLineStatus())) {
+            vpn4GLine.setLineStatus(LineStatus.TERMINATED);
+            vpn4GLineRepository.save(vpn4GLine);
+        }
     }
 }

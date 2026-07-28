@@ -4,8 +4,10 @@ import com.rabittel.lignesservice.entities.Contract;
 import com.rabittel.lignesservice.enums.ContractStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -21,4 +23,8 @@ public interface ContractRepository extends JpaRepository<Contract, UUID>, JpaSp
 
     @Query("SELECT c FROM Contract c WHERE c.startDate >= :startDate AND c.endDate <= :endDate")
     List<Contract> findContractsByDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Modifying
+    @Query("UPDATE Contract c SET c.status='EXPIRED' WHERE c.endDate < CURRENT_DATE AND (c.status='IN_PROGRESS' OR c.status='RENEWED')")
+    int updateExpiredContracts();
 }

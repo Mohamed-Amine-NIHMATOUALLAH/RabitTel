@@ -18,4 +18,5 @@ public interface FTTHLineRepository extends JpaRepository<FTTHLine, UUID>, JpaSp
     boolean existsByLineNumber(String lineNumber);
     boolean existsByFixedLineNumber(String fixedLineNumber);
     Optional<FTTHLine> findByLineNumber(String lineNumber);
+    List<FTTHLine> findByLineStatusIn(List<LineStatus> statuses);
 }

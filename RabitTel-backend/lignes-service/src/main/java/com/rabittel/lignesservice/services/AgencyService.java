@@ -9,11 +9,13 @@ import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.AgencyMapper;
 import com.rabittel.lignesservice.repositories.AgencyRepository;
 import com.rabittel.lignesservice.specifications.AgencySpecification;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -23,111 +25,139 @@ public class AgencyService {
     private final AgencyRepository agencyRepository;
     private final AgencyMapper agencyMapper;
 
-    public AgencyResponseDTO createAgency(AgencyCreateRequestDTO agencyCreateRequestDTO) {
-        Agency agency = agencyMapper.toEntity(agencyCreateRequestDTO);
+    @Transactional
+    public AgencyResponseDTO createAgency(AgencyCreateRequestDTO dto) {
 
-        if (agencyRepository.existsByName(agency.getName())) {
+        if (agencyRepository.existsByName(dto.getName())) {
             throw new ResourceAlreadyExistsException(
-                    "Agency with name " + agency.getName() + " already exists.");
+                    "Agency already exists with name: " + dto.getName());
         }
 
-        if (agencyRepository.existsByDirectorateCode(agency.getDirectorateCode())) {
+        if (agencyRepository.existsByDirectorateCode(dto.getDirectorateCode())) {
             throw new ResourceAlreadyExistsException(
-                    "Agency with directorate code " + agency.getDirectorateCode() + " already exists.");
+                    "Agency already exists with directorate code: " + dto.getDirectorateCode());
         }
+
+        Agency agency = agencyMapper.toEntity(dto);
 
         Agency savedAgency = agencyRepository.save(agency);
+
         return agencyMapper.toAgencyResponseDTO(savedAgency);
     }
 
-    public AgencyResponseDTO updateAgency(UUID id, AgencyUpdateRequestDTO agencyUpdateRequestDTO) {
+    @Transactional
+    public AgencyResponseDTO updateAgency(UUID id, AgencyUpdateRequestDTO dto) {
+
         Agency agency = agencyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Agency with id " + id + " not found."));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Agency not found with id: " + id));
 
-        if (!agency.getName().equals(agencyUpdateRequestDTO.getName())
-                && agencyRepository.existsByName(agencyUpdateRequestDTO.getName())) {
+        if (!Objects.equals(agency.getName(), dto.getName())
+                && agencyRepository.existsByName(dto.getName())) {
+
             throw new ResourceAlreadyExistsException(
-                    "Agency with name " + agencyUpdateRequestDTO.getName() + " already exists.");
+                    "Agency already exists with name: " + dto.getName());
         }
 
-        if (!agency.getDirectorateCode().equals(agencyUpdateRequestDTO.getDirectorateCode())
-                && agencyRepository.existsByDirectorateCode(agencyUpdateRequestDTO.getDirectorateCode())) {
+        if (!Objects.equals(
+                agency.getDirectorateCode(),
+                dto.getDirectorateCode())
+                && agencyRepository.existsByDirectorateCode(dto.getDirectorateCode())) {
+
             throw new ResourceAlreadyExistsException(
-                    "Agency with directorate code " + agencyUpdateRequestDTO.getDirectorateCode() + " already exists.");
+                    "Agency already exists with directorate code: "
+                            + dto.getDirectorateCode());
         }
 
-        agencyMapper.updateEntityFromDto(agencyUpdateRequestDTO, agency);
+        agencyMapper.updateEntityFromDto(dto, agency);
+
         Agency updatedAgency = agencyRepository.save(agency);
+
         return agencyMapper.toAgencyResponseDTO(updatedAgency);
     }
 
+    @Transactional
     public void softDeleteAgency(UUID id) {
-        Agency agency = agencyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Agency with id " + id + " not found."));
 
-        if (agency.getLines() != null && !agency.getLines().isEmpty()) {
+        Agency agency = agencyRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Agency not found with id: " + id));
+
+        if (!agency.getLines().isEmpty()) {
             throw new IllegalStateException(
-                    "Cannot delete agency with active lines - transfer them first");
+                    "Cannot deactivate agency because it still has assigned lines.");
         }
-        if (agency.getActive()) {
+
+        if (Boolean.TRUE.equals(agency.getActive())) {
             agency.setActive(false);
             agencyRepository.save(agency);
         }
     }
-//Admin
-    public void deleteAgency(UUID id) {
-        Agency agency = agencyRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Agency with id " + id + " not found."));
 
-        if (agency.getLines() != null && !agency.getLines().isEmpty()) {
+    //Admin
+    @Transactional
+    public void deleteAgency(UUID id) {
+
+        Agency agency = agencyRepository.findById(id)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Agency not found with id: " + id));
+
+        if (!agency.getLines().isEmpty()) {
             throw new IllegalStateException(
-                    "Cannot delete agency with active lines - transfer them first");
+                    "Cannot delete agency because it still has assigned lines.");
         }
 
-        if (agency.getActive()) {
+        if (Boolean.TRUE.equals(agency.getActive())) {
             throw new IllegalStateException(
-                    "Cannot delete an active agency - deactivate it first");
+                    "Cannot delete an active agency. Deactivate it first.");
         }
 
         agencyRepository.delete(agency);
     }
 
+    @Transactional
     public List<AgencyResponseDTO> getAllAgencies() {
         return agencyRepository.findAll().stream()
                 .map(agencyMapper::toAgencyResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public AgencyResponseDTO getAgencyById(UUID id) {
         Agency agency = agencyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Agency with id " + id + " not found."));
         return agencyMapper.toAgencyResponseDTO(agency);
     }
 
+    @Transactional
     public List<AgencyResponseDTO> getAgenciesByActiveStatus(Boolean active) {
         return agencyRepository.findByActive(active).stream()
                 .map(agencyMapper::toAgencyResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<AgencyResponseDTO> getAgenciesByDirectorateCode(String directorateCode) {
         return agencyRepository.findByDirectorateCode(directorateCode).stream()
                 .map(agencyMapper::toAgencyResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<AgencyResponseDTO> getAgenciesByName(String name) {
         return agencyRepository.findByNameContainingIgnoreCase(name).stream()
                 .map(agencyMapper::toAgencyResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<AgencyResponseDTO> getAgenciesByRegion(String region) {
         return agencyRepository.findByRegion(region).stream()
                 .map(agencyMapper::toAgencyResponseDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<AgencyResponseDTO> searchAgencies(Boolean active, String region, String directorateCode, String name) {
         Specification<Agency> spec = Specification
                 .<Agency>where(AgencySpecification.hasActive(active))

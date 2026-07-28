@@ -13,5 +13,4 @@ import java.util.UUID;
 public interface PlanRepository extends JpaRepository<Plan, UUID> , JpaSpecificationExecutor<Plan> {
     boolean existsByName(@NotBlank String name);
 
-    Plan findById(Long id);
 }
