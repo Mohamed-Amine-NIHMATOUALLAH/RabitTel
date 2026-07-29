@@ -4,7 +4,8 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.RTCLineRequestDTO.
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.RTCLineRequestDTO.RTCLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.RTCLineResponseDTO;
 import com.rabittel.lignesservice.enums.LineStatus;
-import com.rabittel.lignesservice.services.RTCLineService;
+import com.rabittel.lignesservice.services.implementations.RTCLineServiceImpl;
+import com.rabittel.lignesservice.services.interfaces.RTCLineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

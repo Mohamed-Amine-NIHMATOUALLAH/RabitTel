@@ -1,6 +1,6 @@
 package com.rabittel.lignesservice.schedulers;
 
-import com.rabittel.lignesservice.services.ContractService;
+import com.rabittel.lignesservice.services.implementations.ContractServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class ContractScheduler {
 
 
-    private final ContractService expirationService;
+    private final ContractServiceImpl expirationService;
 
 
     @Scheduled(cron="0 0 1 * * *")

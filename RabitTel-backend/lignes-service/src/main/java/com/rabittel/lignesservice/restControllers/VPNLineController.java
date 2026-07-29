@@ -4,7 +4,8 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPNLineRequestDTO.
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPNLineRequestDTO.VPNLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.VPNLineResponseDTO;
 import com.rabittel.lignesservice.enums.LineStatus;
-import com.rabittel.lignesservice.services.VPNLineService;
+import com.rabittel.lignesservice.services.implementations.VPNLineServiceImpl;
+import com.rabittel.lignesservice.services.interfaces.VPNLineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

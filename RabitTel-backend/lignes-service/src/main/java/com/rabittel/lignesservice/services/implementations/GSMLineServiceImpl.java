@@ -1,4 +1,4 @@
-package com.rabittel.lignesservice.services;
+package com.rabittel.lignesservice.services.implementations;
 
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.GSMLineRequestDTO.GSMLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.GSMLineRequestDTO.GSMLineUpdateRequestDTO;
@@ -9,6 +9,7 @@ import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.GSMLineMapper;
 import com.rabittel.lignesservice.repositories.GSMLineRepository;
+import com.rabittel.lignesservice.services.interfaces.GSMLineService;
 import com.rabittel.lignesservice.specifications.GSMLineSpecification;
 import com.rabittel.lignesservice.specifications.LineSpecification;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class GSMLineService {
+public class GSMLineServiceImpl implements GSMLineService {
     private final GSMLineRepository gsmLineRepository;
     private final GSMLineMapper gsmLineMapper;
     private final com.rabittel.lignesservice.repositories.AgencyRepository agencyRepository;

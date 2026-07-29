@@ -1,4 +1,4 @@
-package com.rabittel.lignesservice.services;
+package com.rabittel.lignesservice.services.implementations;
 
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPNLineRequestDTO.VPNLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPNLineRequestDTO.VPNLineUpdateRequestDTO;
@@ -9,6 +9,7 @@ import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.VPNLineMapper;
 import com.rabittel.lignesservice.repositories.VPNLineRepository;
+import com.rabittel.lignesservice.services.interfaces.VPNLineService;
 import com.rabittel.lignesservice.specifications.LineSpecification;
 import com.rabittel.lignesservice.specifications.VPNLineSpecification;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class VPNLineService {
+public class VPNLineServiceImpl implements VPNLineService {
     private final VPNLineRepository vpnLineRepository;
     private final VPNLineMapper vpnLineMapper;
     private final com.rabittel.lignesservice.repositories.AgencyRepository agencyRepository;
@@ -186,41 +187,5 @@ public class VPNLineService {
         return vpnLineRepository.findAll(spec).stream()
                 .map(vpnLineMapper::toVPNLineResponseDTO)
                 .collect(Collectors.toList());
-    }
-
-    private Specification<VPNLine> hasLineNumber(String lineNumber) {
-        return (root, query, criteriaBuilder) -> {
-            if (lineNumber == null || lineNumber.isBlank()) {
-                return criteriaBuilder.conjunction();
-            }
-            return criteriaBuilder.equal(root.get("lineNumber"), lineNumber);
-        };
-    }
-
-    private Specification<VPNLine> hasLineStatus(LineStatus lineStatus) {
-        return (root, query, criteriaBuilder) -> {
-            if (lineStatus == null) {
-                return criteriaBuilder.conjunction();
-            }
-            return criteriaBuilder.equal(root.get("lineStatus"), lineStatus);
-        };
-    }
-
-    private Specification<VPNLine> hasBandwidth(String bandwidth) {
-        return (root, query, criteriaBuilder) -> {
-            if (bandwidth == null || bandwidth.isBlank()) {
-                return criteriaBuilder.conjunction();
-            }
-            return criteriaBuilder.equal(root.get("bandwidth"), bandwidth);
-        };
-    }
-
-    private Specification<VPNLine> hasIpAddress(String ipAddress) {
-        return (root, query, criteriaBuilder) -> {
-            if (ipAddress == null || ipAddress.isBlank()) {
-                return criteriaBuilder.conjunction();
-            }
-            return criteriaBuilder.equal(root.get("ipAddress"), ipAddress);
-        };
     }
 }

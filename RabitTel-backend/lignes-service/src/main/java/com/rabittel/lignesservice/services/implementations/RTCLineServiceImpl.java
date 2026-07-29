@@ -1,4 +1,4 @@
-package com.rabittel.lignesservice.services;
+package com.rabittel.lignesservice.services.implementations;
 
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.RTCLineRequestDTO.RTCLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.RTCLineRequestDTO.RTCLineUpdateRequestDTO;
@@ -9,6 +9,7 @@ import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.RTCLineMapper;
 import com.rabittel.lignesservice.repositories.RTCLineRepository;
+import com.rabittel.lignesservice.services.interfaces.RTCLineService;
 import com.rabittel.lignesservice.specifications.LineSpecification;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class RTCLineService {
+public class RTCLineServiceImpl implements RTCLineService {
     private final RTCLineRepository rtcLineRepository;
     private final RTCLineMapper rtcLineMapper;
     private final com.rabittel.lignesservice.repositories.AgencyRepository agencyRepository;

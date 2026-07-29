@@ -4,7 +4,8 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPN4GLineRequestDT
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPN4GLineRequestDTO.VPN4GLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.VPN4GLineResponseDTO;
 import com.rabittel.lignesservice.enums.LineStatus;
-import com.rabittel.lignesservice.services.VPN4GLineService;
+import com.rabittel.lignesservice.services.implementations.VPN4GLineServiceImpl;
+import com.rabittel.lignesservice.services.interfaces.VPN4GLineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

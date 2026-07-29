@@ -4,7 +4,8 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.GSMLineRequestDTO.
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.GSMLineRequestDTO.GSMLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.GSMLineResponseDTO;
 import com.rabittel.lignesservice.enums.LineStatus;
-import com.rabittel.lignesservice.services.GSMLineService;
+import com.rabittel.lignesservice.services.implementations.GSMLineServiceImpl;
+import com.rabittel.lignesservice.services.interfaces.GSMLineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

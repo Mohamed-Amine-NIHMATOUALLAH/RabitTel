@@ -12,10 +12,5 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 @SuperBuilder
-public class RTCLine extends Line {
-
-    // JPA requires a no-arg constructor with at least protected visibility
-    protected RTCLine() {
-        super();
-    }
-}
+@NoArgsConstructor
+public class RTCLine extends Line { }

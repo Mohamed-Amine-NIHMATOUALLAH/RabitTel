@@ -4,7 +4,8 @@ import com.rabittel.lignesservice.dtos.request.ContractRequestDTO.ContractCreate
 import com.rabittel.lignesservice.dtos.request.ContractRequestDTO.ContractRenewalRequestDTO;
 import com.rabittel.lignesservice.dtos.response.ContractResponseDTO;
 import com.rabittel.lignesservice.enums.ContractStatus;
-import com.rabittel.lignesservice.services.ContractService;
+import com.rabittel.lignesservice.services.implementations.ContractServiceImpl;
+import com.rabittel.lignesservice.services.interfaces.ContractService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

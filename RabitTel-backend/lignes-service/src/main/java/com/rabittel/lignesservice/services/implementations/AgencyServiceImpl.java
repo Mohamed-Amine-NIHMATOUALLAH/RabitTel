@@ -1,4 +1,4 @@
-package com.rabittel.lignesservice.services;
+package com.rabittel.lignesservice.services.implementations;
 
 import com.rabittel.lignesservice.dtos.request.AgencyRequestDTO.AgencyCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.AgencyRequestDTO.AgencyUpdateRequestDTO;
@@ -8,6 +8,7 @@ import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.AgencyMapper;
 import com.rabittel.lignesservice.repositories.AgencyRepository;
+import com.rabittel.lignesservice.services.interfaces.AgencyService;
 import com.rabittel.lignesservice.specifications.AgencySpecification;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,8 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class AgencyService {
+public class
+AgencyServiceImpl implements AgencyService {
     private final AgencyRepository agencyRepository;
     private final AgencyMapper agencyMapper;
 

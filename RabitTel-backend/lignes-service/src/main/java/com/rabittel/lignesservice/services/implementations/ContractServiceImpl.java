@@ -1,4 +1,4 @@
-package com.rabittel.lignesservice.services;
+package com.rabittel.lignesservice.services.implementations;
 
 import com.rabittel.lignesservice.dtos.request.ContractRequestDTO.ContractCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.ContractRequestDTO.ContractRenewalRequestDTO;
@@ -9,6 +9,7 @@ import com.rabittel.lignesservice.exceptions.BusinessRuleException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.ContractMapper;
 import com.rabittel.lignesservice.repositories.ContractRepository;
+import com.rabittel.lignesservice.services.interfaces.ContractService;
 import com.rabittel.lignesservice.specifications.ContractSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -23,7 +24,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class ContractService {
+public class ContractServiceImpl implements ContractService {
     private final ContractRepository contractRepository;
     private final ContractMapper contractMapper;
     private static final int MAX_CONTRACT_DURATION_MONTHS = 120;

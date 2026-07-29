@@ -4,7 +4,8 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.Internet4GLineRequ
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.Internet4GLineRequestDTO.Internet4GLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.Internet4GLineResponseDTO;
 import com.rabittel.lignesservice.enums.LineStatus;
-import com.rabittel.lignesservice.services.Internet4GLineService;
+import com.rabittel.lignesservice.services.implementations.Internet4GLineServiceImpl;
+import com.rabittel.lignesservice.services.interfaces.Internet4GLineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

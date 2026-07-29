@@ -1,15 +1,15 @@
-package com.rabittel.lignesservice.services;
+package com.rabittel.lignesservice.services.implementations;
 
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.FTTHLineRequestDTO.FTTHLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.FTTHLineRequestDTO.FTTHLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.FTTHLineResponseDTO;
-import com.rabittel.lignesservice.dtos.response.GSMLineResponseDTO;
 import com.rabittel.lignesservice.entities.FTTHLine;
 import com.rabittel.lignesservice.enums.LineStatus;
 import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.FTTHLineMapper;
 import com.rabittel.lignesservice.repositories.FTTHLineRepository;
+import com.rabittel.lignesservice.services.interfaces.FTTHLineService;
 import com.rabittel.lignesservice.specifications.FTTHLineSpecification;
 import com.rabittel.lignesservice.specifications.LineSpecification;
 import lombok.AllArgsConstructor;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class FTTHLineService {
+public class FTTHLineServiceImpl implements FTTHLineService {
     private final FTTHLineRepository ftthLineRepository;
     private final FTTHLineMapper ftthLineMapper;
     private final com.rabittel.lignesservice.repositories.AgencyRepository agencyRepository;

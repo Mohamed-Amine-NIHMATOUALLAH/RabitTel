@@ -1,4 +1,4 @@
-package com.rabittel.lignesservice.services;
+package com.rabittel.lignesservice.services.implementations;
 
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.Internet4GLineRequestDTO.Internet4GLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.Internet4GLineRequestDTO.Internet4GLineUpdateRequestDTO;
@@ -12,6 +12,7 @@ import com.rabittel.lignesservice.repositories.AgencyRepository;
 import com.rabittel.lignesservice.repositories.ContractRepository;
 import com.rabittel.lignesservice.repositories.Internet4GLineRepository;
 import com.rabittel.lignesservice.repositories.PlanRepository;
+import com.rabittel.lignesservice.services.interfaces.Internet4GLineService;
 import com.rabittel.lignesservice.specifications.Internet4GLineSpecification;
 import com.rabittel.lignesservice.specifications.LineSpecification;
 import lombok.AllArgsConstructor;
@@ -24,7 +25,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class Internet4GLineService {
+public class Internet4GLineServiceImpl implements Internet4GLineService {
 
     private final Internet4GLineRepository internet4GLineRepository;
     private final Internet4GLineMapper internet4GLineMapper;

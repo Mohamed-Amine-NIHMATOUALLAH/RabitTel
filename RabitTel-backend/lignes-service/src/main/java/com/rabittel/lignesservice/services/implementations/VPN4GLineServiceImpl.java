@@ -1,4 +1,4 @@
-package com.rabittel.lignesservice.services;
+package com.rabittel.lignesservice.services.implementations;
 
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPN4GLineRequestDTO.VPN4GLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPN4GLineRequestDTO.VPN4GLineUpdateRequestDTO;
@@ -9,6 +9,7 @@ import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.VPN4GLineMapper;
 import com.rabittel.lignesservice.repositories.VPN4GLineRepository;
+import com.rabittel.lignesservice.services.interfaces.VPN4GLineService;
 import com.rabittel.lignesservice.specifications.LineSpecification;
 import com.rabittel.lignesservice.specifications.VPN4GLineSpecification;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class VPN4GLineService {
+public class VPN4GLineServiceImpl implements VPN4GLineService {
     private final VPN4GLineRepository vpn4GLineRepository;
     private final VPN4GLineMapper vpn4GLineMapper;
     private final com.rabittel.lignesservice.repositories.AgencyRepository agencyRepository;

@@ -1,4 +1,4 @@
-package com.rabittel.lignesservice.services;
+package com.rabittel.lignesservice.services.implementations;
 
 import com.rabittel.lignesservice.dtos.request.PlanRequestDTO.PlanCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.PlanRequestDTO.PlanUpdateRequestDTO;
@@ -9,6 +9,7 @@ import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.PlanMapper;
 import com.rabittel.lignesservice.repositories.PlanRepository;
+import com.rabittel.lignesservice.services.interfaces.PlanService;
 import com.rabittel.lignesservice.specifications.PlanSpecification;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
-public class PlanService {
+public class PlanServiceImpl implements PlanService {
     private final PlanRepository planRepository;
     private final PlanMapper planMapper;
 

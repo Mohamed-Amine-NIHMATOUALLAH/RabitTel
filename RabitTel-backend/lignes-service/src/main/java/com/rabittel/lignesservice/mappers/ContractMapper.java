@@ -8,7 +8,6 @@ import com.rabittel.lignesservice.entities.Contract;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-
 @Mapper(componentModel = "spring")
 public interface ContractMapper {
     // Entity -> Response DTO

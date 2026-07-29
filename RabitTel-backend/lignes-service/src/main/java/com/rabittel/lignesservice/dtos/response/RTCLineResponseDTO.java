@@ -9,11 +9,5 @@ import lombok.experimental.SuperBuilder;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
-public class RTCLineResponseDTO extends LineResponseDTO {
-    // pas de champ spécifique — hérite uniquement des champs communs
-
-    // explicit no-arg constructor to avoid Lombok duplicate-generation issues
-    public RTCLineResponseDTO() {
-        super();
-    }
-}
+@NoArgsConstructor
+public class RTCLineResponseDTO extends LineResponseDTO { }
