@@ -37,7 +37,6 @@ public class PlanService {
     }
 
     @Transactional
-    @Transactional
     public PlanResponseDTO updatePlan(UUID id, PlanUpdateRequestDTO planUpdateRequestDTO) {
 
         Plan plan = planRepository.findById(id)
