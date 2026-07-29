@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -27,4 +28,6 @@ public class VPNLineUpdateRequestDTO {
     // VPN specific
     private String bandwidth;
     private String ipAddress;
+
+    private LocalDate deliveryDate;
 }
