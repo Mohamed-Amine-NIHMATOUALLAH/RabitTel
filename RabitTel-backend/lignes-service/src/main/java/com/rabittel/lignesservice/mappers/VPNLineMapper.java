@@ -21,6 +21,8 @@ public interface VPNLineMapper {
     @Mapping(source = "contract.endDate", target = "contractEndDate")
     VPNLineResponseDTO toVPNLineResponseDTO(VPNLine vpnLine);
 
+    @Mapping(source = "agencyId", target = "agency.id")
+    @Mapping(source = "planId", target = "plan.id")
     VPNLine toEntity(VPNLineCreateRequestDTO vpnLineCreateRequestDTO);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

@@ -22,7 +22,6 @@ public class Internet4GLineUpdateRequestDTO {
     private UUID agencyId;
     private UUID planId;
     private UUID contractId;
-    private UUID createdBy;
 
     // Internet4G specific
     private String serviceFunction;

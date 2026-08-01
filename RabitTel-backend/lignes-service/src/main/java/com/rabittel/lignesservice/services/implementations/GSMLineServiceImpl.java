@@ -3,8 +3,11 @@ package com.rabittel.lignesservice.services.implementations;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.GSMLineRequestDTO.GSMLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.GSMLineRequestDTO.GSMLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.GSMLineResponseDTO;
+import com.rabittel.lignesservice.entities.Agency;
 import com.rabittel.lignesservice.entities.GSMLine;
+import com.rabittel.lignesservice.entities.Plan;
 import com.rabittel.lignesservice.enums.LineStatus;
+import com.rabittel.lignesservice.enums.LineType;
 import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.GSMLineMapper;
@@ -39,7 +42,21 @@ public class GSMLineServiceImpl implements GSMLineService {
         }
 
         GSMLine gsmLine = gsmLineMapper.toEntity(createRequestDTO);
+
+        Agency agency = agencyRepository.findById(createRequestDTO.getAgencyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
+        Plan plan = planRepository.findById(createRequestDTO.getPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
+
+        gsmLine.setAgency(agency);
+        gsmLine.setPlan(plan);
+
+        gsmLine.setLineType(LineType.GSM_PRO);
+        gsmLine.setLineStatus(LineStatus.ACTIVE);
+
+
         GSMLine savedLine = gsmLineRepository.save(gsmLine);
+
         return gsmLineMapper.toGSMLineResponseDTO(savedLine);
     }
 

@@ -23,7 +23,6 @@ public class VPN4GLineUpdateRequestDTO {
     private UUID agencyId;
     private UUID planId;
     private UUID contractId;
-    private UUID createdBy;
 
     // VPN4G specific
     private String equipment;

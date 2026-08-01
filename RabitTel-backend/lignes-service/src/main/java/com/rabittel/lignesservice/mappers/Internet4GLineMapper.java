@@ -21,6 +21,8 @@ public interface Internet4GLineMapper {
     @Mapping(source = "contract.endDate", target = "contractEndDate")
     Internet4GLineResponseDTO toInternet4GLineResponseDTO(Internet4GLine internet4GLine);
 
+    @Mapping(source = "agencyId", target = "agency.id")
+    @Mapping(source = "planId", target = "plan.id")
     Internet4GLine toEntity(Internet4GLineCreateRequestDTO internet4GLineCreateRequestDTO);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

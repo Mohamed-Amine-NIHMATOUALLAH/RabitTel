@@ -21,6 +21,8 @@ public interface RTCLineMapper {
     @Mapping(source = "contract.endDate", target = "contractEndDate")
     RTCLineResponseDTO toRTCLineResponseDTO(RTCLine rtcLine);
 
+    @Mapping(source = "agencyId", target = "agency.id")
+    @Mapping(source = "planId", target = "plan.id")
     RTCLine toEntity(RTCLineCreateRequestDTO rtcLineCreateRequestDTO);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

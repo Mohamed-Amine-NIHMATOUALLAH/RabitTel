@@ -23,7 +23,6 @@ public class VPNLineUpdateRequestDTO {
     private UUID agencyId;
     private UUID planId;
     private UUID contractId;
-    private UUID createdBy;
 
     // VPN specific
     private String bandwidth;

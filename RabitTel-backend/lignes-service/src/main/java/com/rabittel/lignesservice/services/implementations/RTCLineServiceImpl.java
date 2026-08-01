@@ -3,8 +3,11 @@ package com.rabittel.lignesservice.services.implementations;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.RTCLineRequestDTO.RTCLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.RTCLineRequestDTO.RTCLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.RTCLineResponseDTO;
+import com.rabittel.lignesservice.entities.Agency;
+import com.rabittel.lignesservice.entities.Plan;
 import com.rabittel.lignesservice.entities.RTCLine;
 import com.rabittel.lignesservice.enums.LineStatus;
+import com.rabittel.lignesservice.enums.LineType;
 import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.RTCLineMapper;
@@ -34,7 +37,21 @@ public class RTCLineServiceImpl implements RTCLineService {
         }
 
         RTCLine rtcLine = rtcLineMapper.toEntity(createRequestDTO);
+
+        Agency agency = agencyRepository.findById(createRequestDTO.getAgencyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
+        Plan plan = planRepository.findById(createRequestDTO.getPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
+
+        rtcLine.setAgency(agency);
+        rtcLine.setPlan(plan);
+
+        rtcLine.setLineType(LineType.RTC);
+        rtcLine.setLineStatus(LineStatus.ACTIVE);
+
+
         RTCLine savedLine = rtcLineRepository.save(rtcLine);
+
         return rtcLineMapper.toRTCLineResponseDTO(savedLine);
     }
 

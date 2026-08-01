@@ -3,8 +3,11 @@ package com.rabittel.lignesservice.services.implementations;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPNLineRequestDTO.VPNLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPNLineRequestDTO.VPNLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.VPNLineResponseDTO;
+import com.rabittel.lignesservice.entities.Agency;
+import com.rabittel.lignesservice.entities.Plan;
 import com.rabittel.lignesservice.entities.VPNLine;
 import com.rabittel.lignesservice.enums.LineStatus;
+import com.rabittel.lignesservice.enums.LineType;
 import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.VPNLineMapper;
@@ -39,6 +42,19 @@ public class VPNLineServiceImpl implements VPNLineService {
         }
 
         VPNLine vpnLine = vpnLineMapper.toEntity(createRequestDTO);
+
+        Agency agency = agencyRepository.findById(createRequestDTO.getAgencyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
+        Plan plan = planRepository.findById(createRequestDTO.getPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
+
+        vpnLine.setAgency(agency);
+        vpnLine.setPlan(plan);
+
+        vpnLine.setLineType(LineType.VPN_ADSL);
+        vpnLine.setLineStatus(LineStatus.ACTIVE);
+
+
         VPNLine savedLine = vpnLineRepository.save(vpnLine);
         return vpnLineMapper.toVPNLineResponseDTO(savedLine);
     }
@@ -102,9 +118,6 @@ public class VPNLineServiceImpl implements VPNLineService {
             vpnLine.setContract(contract);
         }
 
-        if (updateRequestDTO.getCreatedBy() != null) {
-            vpnLine.setCreatedBy(updateRequestDTO.getCreatedBy());
-        }
 
         VPNLine updatedLine = vpnLineRepository.save(vpnLine);
 

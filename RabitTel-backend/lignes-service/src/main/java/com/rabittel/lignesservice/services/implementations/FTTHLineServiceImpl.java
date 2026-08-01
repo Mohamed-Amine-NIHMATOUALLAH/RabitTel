@@ -3,8 +3,11 @@ package com.rabittel.lignesservice.services.implementations;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.FTTHLineRequestDTO.FTTHLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.FTTHLineRequestDTO.FTTHLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.FTTHLineResponseDTO;
+import com.rabittel.lignesservice.entities.Agency;
 import com.rabittel.lignesservice.entities.FTTHLine;
+import com.rabittel.lignesservice.entities.Plan;
 import com.rabittel.lignesservice.enums.LineStatus;
+import com.rabittel.lignesservice.enums.LineType;
 import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.FTTHLineMapper;
@@ -39,7 +42,20 @@ public class FTTHLineServiceImpl implements FTTHLineService {
         }
 
         FTTHLine ftthLine = ftthLineMapper.toEntity(createRequestDTO);
+
+        Agency agency = agencyRepository.findById(createRequestDTO.getAgencyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
+        Plan plan = planRepository.findById(createRequestDTO.getPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
+
+        ftthLine.setAgency(agency);
+        ftthLine.setPlan(plan);
+        ftthLine.setLineType(LineType.FTTH);
+        ftthLine.setLineStatus(LineStatus.ACTIVE);
+
+
         FTTHLine savedLine = ftthLineRepository.save(ftthLine);
+
         return ftthLineMapper.toFTTHLineResponseDTO(savedLine);
     }
 

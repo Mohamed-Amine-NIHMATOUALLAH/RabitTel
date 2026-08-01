@@ -63,9 +63,6 @@ public abstract class Line {
     @JoinColumn(name = "contract_id")
     private Contract contract;
 
-    @NotNull
-    @Column(nullable = false)
-    private UUID createdBy;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

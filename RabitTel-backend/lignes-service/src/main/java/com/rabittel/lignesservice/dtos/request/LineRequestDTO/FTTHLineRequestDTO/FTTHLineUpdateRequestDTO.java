@@ -22,7 +22,6 @@ public class FTTHLineUpdateRequestDTO {
     private UUID agencyId;
     private UUID planId;
     private UUID contractId;
-    private UUID createdBy;
 
     // FTTH specific
     private String fixedLineNumber;

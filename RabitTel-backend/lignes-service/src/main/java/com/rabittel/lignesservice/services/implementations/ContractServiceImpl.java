@@ -68,13 +68,17 @@ public class ContractServiceImpl implements ContractService {
                     "Contract duration cannot exceed " + MAX_CONTRACT_DURATION_MONTHS + " months.");
         }
 
-        LocalDate newStartDate = contract.getEndDate();
+        LocalDate newStartDate;
+        if(contract.getEndDate().isBefore(LocalDate.now())){
+             newStartDate = contract.getEndDate();
+        } else {
+             newStartDate = LocalDate.now();
+        }
 
         contract.setStartDate(newStartDate);
 
-        contract.setDurationMonths(
-                renewalRequestDTO.getNewDurationMonths()
-        );
+
+        contract.setDurationMonths(contract.getDurationMonths() + renewalRequestDTO.getNewDurationMonths());
 
         LocalDate newEndDate =
                 newStartDate.plusMonths(
@@ -99,12 +103,6 @@ public class ContractServiceImpl implements ContractService {
         if (contract.getLines() != null && !contract.getLines().isEmpty()) {
             throw new BusinessRuleException(
                 "Cannot delete contract with associated lines - delete or transfer lines first");
-        }
-        if (contract.getStatus() == ContractStatus.IN_PROGRESS
-                || contract.getStatus() == ContractStatus.RENEWED) {
-
-            throw new BusinessRuleException(
-                    "Cannot delete an active contract.");
         }
 
         contractRepository.delete(contract);

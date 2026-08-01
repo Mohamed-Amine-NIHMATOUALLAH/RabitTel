@@ -3,8 +3,11 @@ package com.rabittel.lignesservice.services.implementations;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPN4GLineRequestDTO.VPN4GLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPN4GLineRequestDTO.VPN4GLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.VPN4GLineResponseDTO;
+import com.rabittel.lignesservice.entities.Agency;
+import com.rabittel.lignesservice.entities.Plan;
 import com.rabittel.lignesservice.entities.VPN4GLine;
 import com.rabittel.lignesservice.enums.LineStatus;
+import com.rabittel.lignesservice.enums.LineType;
 import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.VPN4GLineMapper;
@@ -43,7 +46,21 @@ public class VPN4GLineServiceImpl implements VPN4GLineService {
         }
 
         VPN4GLine vpn4GLine = vpn4GLineMapper.toEntity(createRequestDTO);
+
+        Agency agency = agencyRepository.findById(createRequestDTO.getAgencyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
+        Plan plan = planRepository.findById(createRequestDTO.getPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
+
+        vpn4GLine.setAgency(agency);
+        vpn4GLine.setPlan(plan);
+
+        vpn4GLine.setLineType(LineType.G4_VPN);
+        vpn4GLine.setLineStatus(LineStatus.ACTIVE);
+
+
         VPN4GLine savedLine = vpn4GLineRepository.save(vpn4GLine);
+
         return vpn4GLineMapper.toVPN4GLineResponseDTO(savedLine);
     }
 
@@ -118,9 +135,6 @@ public class VPN4GLineServiceImpl implements VPN4GLineService {
             vpn4GLine.setContract(contract);
         }
 
-        if (updateRequestDTO.getCreatedBy() != null) {
-            vpn4GLine.setCreatedBy(updateRequestDTO.getCreatedBy());
-        }
 
         VPN4GLine updatedLine = vpn4GLineRepository.save(vpn4GLine);
 

@@ -21,6 +21,8 @@ public interface GSMLineMapper {
     @Mapping(source = "contract.endDate", target = "contractEndDate")
     GSMLineResponseDTO toGSMLineResponseDTO(GSMLine gsmLine);
 
+    @Mapping(source = "agencyId", target = "agency.id")
+    @Mapping(source = "planId", target = "plan.id")
     GSMLine toEntity(GSMLineCreateRequestDTO gsmLineCreateRequestDTO);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

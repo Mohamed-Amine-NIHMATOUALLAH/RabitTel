@@ -33,7 +33,7 @@ public abstract class LineResponseDTO {
     private UUID contractId;
     private LocalDate contractEndDate;
 
-    private UUID createdBy;
+
     private LocalDateTime creationDate;
     private LocalDateTime lastModificationDate;
 }

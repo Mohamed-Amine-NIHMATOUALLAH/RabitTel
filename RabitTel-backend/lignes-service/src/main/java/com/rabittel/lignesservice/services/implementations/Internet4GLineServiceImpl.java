@@ -3,8 +3,11 @@ package com.rabittel.lignesservice.services.implementations;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.Internet4GLineRequestDTO.Internet4GLineCreateRequestDTO;
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.Internet4GLineRequestDTO.Internet4GLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.Internet4GLineResponseDTO;
+import com.rabittel.lignesservice.entities.Agency;
 import com.rabittel.lignesservice.entities.Internet4GLine;
+import com.rabittel.lignesservice.entities.Plan;
 import com.rabittel.lignesservice.enums.LineStatus;
+import com.rabittel.lignesservice.enums.LineType;
 import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.Internet4GLineMapper;
@@ -66,8 +69,20 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
         Internet4GLine internet4GLine =
                 internet4GLineMapper.toEntity(createRequestDTO);
 
-        Internet4GLine savedLine =
-                internet4GLineRepository.save(internet4GLine);
+        Agency agency = agencyRepository.findById(createRequestDTO.getAgencyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
+        Plan plan = planRepository.findById(createRequestDTO.getPlanId())
+                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
+
+        internet4GLine.setAgency(agency);
+        internet4GLine.setPlan(plan);
+
+        internet4GLine.setLineType(LineType.G4);
+        internet4GLine.setLineStatus(LineStatus.ACTIVE);
+
+
+        Internet4GLine savedLine = internet4GLineRepository.save(internet4GLine);
+
 
         return internet4GLineMapper.toInternet4GLineResponseDTO(savedLine);
     }
@@ -187,11 +202,6 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
 
 
 
-        if (updateRequestDTO.getCreatedBy() != null) {
-            internet4GLine.setCreatedBy(
-                    updateRequestDTO.getCreatedBy()
-            );
-        }
 
 
 

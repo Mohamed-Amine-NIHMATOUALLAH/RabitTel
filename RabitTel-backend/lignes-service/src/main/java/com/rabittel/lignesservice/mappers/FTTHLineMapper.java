@@ -13,6 +13,7 @@ import org.mapstruct.NullValuePropertyMappingStrategy;
 @Mapper(componentModel = "spring")
 public interface FTTHLineMapper {
 
+    // Entity → DTO  (inchangé)
     @Mapping(source = "agency.id", target = "agencyId")
     @Mapping(source = "agency.name", target = "agencyName")
     @Mapping(source = "plan.id", target = "planId")
@@ -21,8 +22,12 @@ public interface FTTHLineMapper {
     @Mapping(source = "contract.endDate", target = "contractEndDate")
     FTTHLineResponseDTO toFTTHLineResponseDTO(FTTHLine ftthLine);
 
+    // DTO → Entity  ← ajouter ces deux @Mapping ICI
+    @Mapping(source = "agencyId", target = "agency.id")
+    @Mapping(source = "planId", target = "plan.id")
     FTTHLine toEntity(FTTHLineCreateRequestDTO ftthLineCreateRequestDTO);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(FTTHLineUpdateRequestDTO ftthLineUpdateRequestDTO, @MappingTarget FTTHLine ftthLine);
 }
+
