@@ -3,6 +3,7 @@ package com.rabittel.lignesservice.dtos.request.LineRequestDTO.Internet4GLineReq
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -47,6 +48,7 @@ public class Internet4GLineCreateRequestDTO {
     @NotBlank
     private String equipmentSerialNumber;
 
-    @NotBlank
-    private String bandwidth;
+    @NotNull
+    @Positive
+    private Long bandwidth;
 }

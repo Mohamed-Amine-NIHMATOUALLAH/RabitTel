@@ -32,10 +32,10 @@ public class GSMLine extends Line {
     private LocalDate chipDeliveryDate;
 
     @NotBlank
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 4)
     private String pinCode;
 
     @NotBlank
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 8)
     private String pukCode;
 }

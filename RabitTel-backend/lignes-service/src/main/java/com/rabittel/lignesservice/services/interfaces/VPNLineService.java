@@ -30,7 +30,7 @@ public interface VPNLineService {
     List<VPNLineResponseDTO> searchVPNLines(
             String lineNumber,
             LineStatus status,
-            String bandwidth,
+            Long bandwidth,
             String ipAddress
     );
 }

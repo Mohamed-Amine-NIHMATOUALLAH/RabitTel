@@ -4,7 +4,6 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.Internet4GLineRequ
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.Internet4GLineRequestDTO.Internet4GLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.Internet4GLineResponseDTO;
 import com.rabittel.lignesservice.enums.LineStatus;
-import com.rabittel.lignesservice.services.implementations.Internet4GLineServiceImpl;
 import com.rabittel.lignesservice.services.interfaces.Internet4GLineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -63,7 +62,7 @@ public class Internet4GLineController {
             @RequestParam(required = false) String pukCode,
             @RequestParam(required = false) String equipment,
             @RequestParam(required = false) String equipmentSerialNumber,
-            @RequestParam(required = false) String bandwidth
+            @RequestParam(required = false) Long bandwidth
     ) {
         if (lineNumber == null && lineStatus == null && serviceFunction == null && simSerialNumber == null
                 && pinCode == null && pukCode == null && equipment == null

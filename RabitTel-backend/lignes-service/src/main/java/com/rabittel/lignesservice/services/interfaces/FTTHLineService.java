@@ -27,5 +27,5 @@ public interface FTTHLineService {
     List<FTTHLineResponseDTO> getAllBillableFTTHLines();
 
     List<FTTHLineResponseDTO> searchFTTHLines(String lineNumber, LineStatus lineStatus,
-                                              String fixedLineNumber, String routerBrand, String bandwidth);
+                                              String fixedLineNumber, String routerBrand, Long bandwidth);
 }

@@ -15,8 +15,8 @@ public class FTTHLineSpecification {
                 routerBrand == null ? null : cb.like(cb.lower(root.get("routerBrand")), "%" + routerBrand.toLowerCase() + "%");
     }
 
-    public static Specification<FTTHLine> hasBandwidth(String bandwidth) {
+    public static Specification<FTTHLine> hasBandwidth(Long bandwidth) {
         return (root, query, cb) ->
-                bandwidth == null ? null : cb.like(cb.lower(root.get("bandwidth")), "%" + bandwidth.toLowerCase() + "%");
+                bandwidth == null ? null : cb.like(cb.lower(root.get("bandwidth")), "%" + bandwidth + "%");
     }
 }

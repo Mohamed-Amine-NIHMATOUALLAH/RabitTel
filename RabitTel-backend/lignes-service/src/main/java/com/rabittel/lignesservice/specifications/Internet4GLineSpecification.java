@@ -35,8 +35,8 @@ public class Internet4GLineSpecification {
                 equipmentSerialNumber == null ? null : cb.like(cb.lower(root.get("equipmentSerialNumber")), "%" + equipmentSerialNumber.toLowerCase() + "%");
     }
 
-    public static Specification<Internet4GLine> hasBandwidth(String bandwidth) {
+    public static Specification<Internet4GLine> hasBandwidth(Long bandwidth) {
         return (root, query, cb) ->
-                bandwidth == null ? null : cb.like(cb.lower(root.get("bandwidth")), "%" + bandwidth.toLowerCase() + "%");
+                bandwidth == null ? null : cb.like(cb.lower(root.get("bandwidth")), "%" + bandwidth + "%");
     }
 }

@@ -14,8 +14,10 @@ function CreateForm({ onSubmit, isPending, error, onCancel }: {
   const [err, setErr] = useState('')
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!f.lineNumber || !f.contractualAmount || !f.agencyId || !f.planId || !f.bandwidth || !f.ipAddress) { setErr('Tous les champs sont obligatoires'); return }
-    onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), lineType: LineType.VPN_ADSL, lineStatus: LineStatus.ACTIVE })
+    if (!f.lineNumber || !f.contractualAmount || !f.agencyId || !f.planId || !f.bandwidth || !f.ipAddress) {
+      setErr('Tous les champs sont obligatoires'); return
+    }
+    onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), bandwidth: Number(f.bandwidth), lineType: LineType.VPN_ADSL, lineStatus: LineStatus.ACTIVE })
   }
   return (
     <form onSubmit={handleSubmit}>
@@ -29,7 +31,7 @@ function CreateForm({ onSubmit, isPending, error, onCancel }: {
         <option value="">-- sélectionner --</option>
         {plans.map((pl: PlanResponse) => <option key={pl.id} value={pl.id}>{pl.name}</option>)}
       </select></label></div>
-      <div><label>Débit<br /><input value={f.bandwidth} placeholder="ex: 512 KB, 1M" onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))} /></label></div>
+      <div><label>Débit (Kbps)<br /><input type="number" value={f.bandwidth} placeholder="ex: 512, 1024" onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))} /></label></div>
       <div><label>Adresse IP<br /><input value={f.ipAddress} placeholder="ex: 192.168.1.1" onChange={e => setF(p => ({ ...p, ipAddress: e.target.value }))} /></label></div>
       {err && <p style={{ color: 'red' }}>{err}</p>}
       <ErrorMsg error={error} />
@@ -50,10 +52,16 @@ function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
     contractualAmount: String(initial.contractualAmount),
     agencyId: initial.agencyId, planId: initial.planId,
     contractId: initial.contractId ?? '',
-    bandwidth: initial.bandwidth, ipAddress: initial.ipAddress,
+    bandwidth: initial.bandwidth != null ? String(initial.bandwidth) : '0',
+    ipAddress: initial.ipAddress,
   })
   return (
-    <form onSubmit={e => { e.preventDefault(); onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), contractId: f.contractId || undefined }) }}>
+    <form onSubmit={e => {
+      e.preventDefault()
+      const bw = Number(f.bandwidth)
+      if (!bw || bw <= 0) { alert('Le débit doit être un nombre positif'); return }
+      onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), bandwidth: bw, contractId: f.contractId || undefined })
+    }}>
       <div><label>Numéro de ligne<br /><input value={f.lineNumber} onChange={e => setF(p => ({ ...p, lineNumber: e.target.value }))} /></label></div>
       <div><label>État<br /><select value={f.lineStatus} onChange={e => setF(p => ({ ...p, lineStatus: e.target.value as LineStatus }))}>
         {Object.values(LineStatus).map((s: string) => <option key={s} value={s}>{s}</option>)}
@@ -69,7 +77,7 @@ function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
         <option value="">Aucun</option>
         {contracts.map((c: ContractResponse) => <option key={c.id} value={c.id}>{c.id.slice(0, 8)} — {c.endDate}</option>)}
       </select></label></div>
-      <div><label>Débit<br /><input value={f.bandwidth} onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))} /></label></div>
+      <div><label>Débit (Kbps)<br /><input type="number" value={f.bandwidth} onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))} /></label></div>
       <div><label>Adresse IP<br /><input value={f.ipAddress} onChange={e => setF(p => ({ ...p, ipAddress: e.target.value }))} /></label></div>
       <ErrorMsg error={error} />
       <div style={{ marginTop: 8 }}>

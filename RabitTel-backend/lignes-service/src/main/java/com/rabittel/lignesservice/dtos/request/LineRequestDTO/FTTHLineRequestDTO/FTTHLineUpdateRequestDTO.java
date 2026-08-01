@@ -26,5 +26,5 @@ public class FTTHLineUpdateRequestDTO {
     // FTTH specific
     private String fixedLineNumber;
     private String routerBrand;
-    private String bandwidth;
+    private Long bandwidth;
 }

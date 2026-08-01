@@ -188,7 +188,7 @@ public class VPNLineServiceImpl implements VPNLineService {
     public List<VPNLineResponseDTO> searchVPNLines(
             String lineNumber,
             LineStatus lineStatus,
-            String bandwidth,
+            Long bandwidth,
             String ipAddress) {
 
         Specification<VPNLine> spec = Specification

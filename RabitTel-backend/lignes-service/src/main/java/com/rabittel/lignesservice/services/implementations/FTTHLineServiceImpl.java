@@ -152,7 +152,7 @@ public class FTTHLineServiceImpl implements FTTHLineService {
     }
 
     public List<FTTHLineResponseDTO> searchFTTHLines(String lineNumber, LineStatus lineStatus,
-                                                     String fixedLineNumber, String routerBrand, String bandwidth) {
+                                                     String fixedLineNumber, String routerBrand, Long bandwidth) {
         Specification<FTTHLine> spec = Specification
                 .<FTTHLine>where(LineSpecification.hasLineNumber(lineNumber))
                 .and(LineSpecification.hasLineStatus(lineStatus))

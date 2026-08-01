@@ -30,5 +30,5 @@ public class Internet4GLineUpdateRequestDTO {
     private String pukCode;
     private String equipment;
     private String equipmentSerialNumber;
-    private String bandwidth;
+    private Long bandwidth;
 }

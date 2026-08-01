@@ -4,7 +4,6 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPNLineRequestDTO.
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPNLineRequestDTO.VPNLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.VPNLineResponseDTO;
 import com.rabittel.lignesservice.enums.LineStatus;
-import com.rabittel.lignesservice.services.implementations.VPNLineServiceImpl;
 import com.rabittel.lignesservice.services.interfaces.VPNLineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -57,7 +56,7 @@ public class VPNLineController {
     public List<VPNLineResponseDTO> findAll(
             @RequestParam(required = false) String lineNumber,
             @RequestParam(required = false) LineStatus lineStatus,
-            @RequestParam(required = false) String bandwidth,
+            @RequestParam(required = false) Long bandwidth,
             @RequestParam(required = false) String ipAddress
     ) {
         if (lineNumber == null && lineStatus == null && bandwidth == null && ipAddress == null) {

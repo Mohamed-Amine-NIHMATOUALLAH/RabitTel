@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -27,11 +29,11 @@ public class Internet4GLine extends Line {
     private String simSerialNumber;
 
     @NotBlank
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 4)
     private String pinCode;
 
     @NotBlank
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 8)
     private String pukCode;
 
     @NotBlank
@@ -42,7 +44,8 @@ public class Internet4GLine extends Line {
     @Column(nullable = false, unique = true, length = 100)
     private String equipmentSerialNumber;
 
-    @NotBlank
+    @NotNull
+    @Positive
     @Column(nullable = false, length = 50)
-    private String bandwidth;
+    private Long bandwidth;
 }

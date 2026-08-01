@@ -93,11 +93,11 @@ export interface FTTHLineCreateRequest {
   contractualAmount: number
   agencyId: string
   planId: string
-  lineType: LineType         // required: mapped to entity, always FTTH
-  lineStatus: LineStatus     // required: mapped to entity, always ACTIVE on creation
+  lineType: LineType
+  lineStatus: LineStatus
   fixedLineNumber: string
   routerBrand: string
-  bandwidth: string
+  bandwidth: number   // long en backend
 }
 export interface FTTHLineUpdateRequest {
   lineNumber?: string
@@ -108,7 +108,7 @@ export interface FTTHLineUpdateRequest {
   contractId?: string
   fixedLineNumber?: string
   routerBrand?: string
-  bandwidth?: string
+  bandwidth: number   // long primitif — toujours envoyer une valeur, jamais undefined
 }
 
 // RTC
@@ -140,9 +140,9 @@ export interface VPNLineCreateRequest {
   contractualAmount: number
   agencyId: string
   planId: string
-  lineType: LineType         // required: always VPN_ADSL
-  lineStatus: LineStatus     // required: always ACTIVE on creation
-  bandwidth: string
+  lineType: LineType
+  lineStatus: LineStatus
+  bandwidth: number   // long en backend
   ipAddress: string
 }
 export interface VPNLineUpdateRequest {
@@ -152,7 +152,7 @@ export interface VPNLineUpdateRequest {
   agencyId?: string
   planId?: string
   contractId?: string
-  bandwidth?: string
+  bandwidth: number   // long primitif — toujours envoyer une valeur, jamais undefined
   ipAddress?: string
 }
 
@@ -206,15 +206,15 @@ export interface Internet4GLineCreateRequest {
   contractualAmount: number
   agencyId: string
   planId: string
-  lineType: LineType         // required: always G4
-  lineStatus: LineStatus     // required: always ACTIVE on creation
+  lineType: LineType
+  lineStatus: LineStatus
   serviceFunction: string
   simSerialNumber: string
   pinCode: string
   pukCode: string
   equipment: string
   equipmentSerialNumber: string
-  bandwidth: string
+  bandwidth: number   // long en backend
 }
 export interface Internet4GLineUpdateRequest {
   lineNumber?: string
@@ -229,7 +229,7 @@ export interface Internet4GLineUpdateRequest {
   pukCode?: string
   equipment?: string
   equipmentSerialNumber?: string
-  bandwidth?: string
+  bandwidth: number   // long primitif — toujours envoyer une valeur, jamais undefined
 }
 
 // VPN 4G

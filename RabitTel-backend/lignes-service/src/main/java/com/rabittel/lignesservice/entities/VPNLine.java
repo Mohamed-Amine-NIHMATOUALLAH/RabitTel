@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.PrimaryKeyJoinColumn;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -18,9 +20,10 @@ import lombok.experimental.SuperBuilder;
 @AllArgsConstructor
 public class VPNLine extends Line {
 
-    @NotBlank
+    @NotNull
+    @Positive
     @Column(nullable = false, length = 50)
-    private String bandwidth;
+    private Long bandwidth;
 
     @NotBlank
     @Column(nullable = false, unique = true, length = 45)

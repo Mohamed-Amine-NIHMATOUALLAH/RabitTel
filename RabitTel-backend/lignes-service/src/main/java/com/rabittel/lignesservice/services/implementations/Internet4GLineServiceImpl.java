@@ -355,7 +355,7 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
             String pukCode,
             String equipment,
             String equipmentSerialNumber,
-            String bandwidth) {
+            Long bandwidth) {
 
 
         Specification<Internet4GLine> spec =

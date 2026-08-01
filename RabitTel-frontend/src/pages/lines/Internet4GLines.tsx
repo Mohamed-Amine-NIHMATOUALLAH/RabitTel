@@ -21,7 +21,7 @@ function CreateForm({ onSubmit, isPending, error, onCancel }: {
     if (!f.lineNumber || !f.contractualAmount || !f.agencyId || !f.planId || !f.serviceFunction || !f.simSerialNumber || !f.pinCode || !f.pukCode || !f.equipment || !f.equipmentSerialNumber || !f.bandwidth) {
       setErr('Tous les champs sont obligatoires'); return
     }
-    onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), lineType: LineType.G4, lineStatus: LineStatus.ACTIVE })
+    onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), bandwidth: Number(f.bandwidth), lineType: LineType.G4, lineStatus: LineStatus.ACTIVE })
   }
   return (
     <form onSubmit={handleSubmit}>
@@ -41,7 +41,7 @@ function CreateForm({ onSubmit, isPending, error, onCancel }: {
       <div><label>Code PUK<br /><input value={f.pukCode} onChange={e => setF(p => ({ ...p, pukCode: e.target.value }))} /></label></div>
       <div><label>Équipement<br /><input value={f.equipment} onChange={e => setF(p => ({ ...p, equipment: e.target.value }))} /></label></div>
       <div><label>N° Série équipement<br /><input value={f.equipmentSerialNumber} onChange={e => setF(p => ({ ...p, equipmentSerialNumber: e.target.value }))} /></label></div>
-      <div><label>Débit<br /><input value={f.bandwidth} placeholder="ex: 40Go, 70Go" onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))} /></label></div>
+      <div><label>Débit (Go)<br /><input type="number" value={f.bandwidth} placeholder="ex: 40, 70, 90" onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))} /></label></div>
       {err && <p style={{ color: 'red' }}>{err}</p>}
       <ErrorMsg error={error} />
       <div style={{ marginTop: 8 }}>
@@ -64,10 +64,15 @@ function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
     serviceFunction: initial.serviceFunction, simSerialNumber: initial.simSerialNumber,
     pinCode: initial.pinCode, pukCode: initial.pukCode,
     equipment: initial.equipment, equipmentSerialNumber: initial.equipmentSerialNumber,
-    bandwidth: initial.bandwidth,
+    bandwidth: initial.bandwidth != null ? String(initial.bandwidth) : '0',
   })
   return (
-    <form onSubmit={e => { e.preventDefault(); onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), contractId: f.contractId || undefined }) }}>
+    <form onSubmit={e => {
+      e.preventDefault()
+      const bw = Number(f.bandwidth)
+      if (!bw || bw <= 0) { alert('Le débit doit être un nombre positif'); return }
+      onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), bandwidth: bw, contractId: f.contractId || undefined })
+    }}>
       <div><label>Numéro de ligne<br /><input value={f.lineNumber} onChange={e => setF(p => ({ ...p, lineNumber: e.target.value }))} /></label></div>
       <div><label>État<br /><select value={f.lineStatus} onChange={e => setF(p => ({ ...p, lineStatus: e.target.value as LineStatus }))}>
         {Object.values(LineStatus).map((s: string) => <option key={s} value={s}>{s}</option>)}
@@ -89,7 +94,7 @@ function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
       <div><label>Code PUK<br /><input value={f.pukCode} onChange={e => setF(p => ({ ...p, pukCode: e.target.value }))} /></label></div>
       <div><label>Équipement<br /><input value={f.equipment} onChange={e => setF(p => ({ ...p, equipment: e.target.value }))} /></label></div>
       <div><label>N° Série équipement<br /><input value={f.equipmentSerialNumber} onChange={e => setF(p => ({ ...p, equipmentSerialNumber: e.target.value }))} /></label></div>
-      <div><label>Débit<br /><input value={f.bandwidth} onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))} /></label></div>
+      <div><label>Débit (Go)<br /><input type="number" value={f.bandwidth} onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))} /></label></div>
       <ErrorMsg error={error} />
       <div style={{ marginTop: 8 }}>
         <button type="submit" disabled={isPending}>{isPending ? 'Enregistrement…' : 'Enregistrer'}</button>

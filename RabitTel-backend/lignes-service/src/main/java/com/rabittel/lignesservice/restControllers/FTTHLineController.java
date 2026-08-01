@@ -4,7 +4,6 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.FTTHLineRequestDTO
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.FTTHLineRequestDTO.FTTHLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.FTTHLineResponseDTO;
 import com.rabittel.lignesservice.enums.LineStatus;
-import com.rabittel.lignesservice.services.implementations.FTTHLineServiceImpl;
 import com.rabittel.lignesservice.services.interfaces.FTTHLineService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -59,7 +58,7 @@ public class FTTHLineController {
             @RequestParam(required = false) LineStatus lineStatus,
             @RequestParam(required = false) String fixedLineNumber,
             @RequestParam(required = false) String routerBrand,
-            @RequestParam(required = false) String bandwidth
+            @RequestParam(required = false) Long bandwidth
     ) {
         if (lineNumber == null && lineStatus == null && fixedLineNumber == null
                 && routerBrand == null && bandwidth == null) {

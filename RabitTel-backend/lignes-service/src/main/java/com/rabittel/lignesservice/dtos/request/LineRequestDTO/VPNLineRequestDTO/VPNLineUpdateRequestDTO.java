@@ -25,7 +25,7 @@ public class VPNLineUpdateRequestDTO {
     private UUID contractId;
 
     // VPN specific
-    private String bandwidth;
+    private Long bandwidth;
     private String ipAddress;
 
     private LocalDate deliveryDate;
