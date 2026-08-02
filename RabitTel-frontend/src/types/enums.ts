@@ -19,3 +19,8 @@ export enum LineType {
   G4_VPN = 'G4_VPN',
   GSM_PRO = 'GSM_PRO',
 }
+
+export enum UserRole {
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER',
+}

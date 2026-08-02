@@ -10,10 +10,54 @@ import type {
   GSMLineResponse, GSMLineCreateRequest, GSMLineUpdateRequest,
   Internet4GLineResponse, Internet4GLineCreateRequest, Internet4GLineUpdateRequest,
   VPN4GLineResponse, VPN4GLineCreateRequest, VPN4GLineUpdateRequest,
+  LoginRequest, LoginResponse,
+  UserResponse, AdminCreateUserRequest, AdminUpdateUserRequest,
+  UserUpdateRequest, ChangePasswordRequest, ForgotPasswordRequest,
+  Page,
 } from '../types'
 import { ContractStatus, LineStatus } from '../types'
 
 const d = <T>(r: AxiosResponse<T>) => r.data
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+export const authService = {
+  login: (req: LoginRequest) =>
+    api.post<LoginResponse>('/auth/login', req).then(d),
+  changePassword: (req: ChangePasswordRequest) =>
+    api.post<void>('/auth/change-password', req).then(() => undefined as void),
+}
+
+// ─── Admin Users ─────────────────────────────────────────────────────────────
+export const userService = {
+  create: (req: AdminCreateUserRequest) =>
+    api.post<UserResponse>('/admin/users', req).then(d),
+  update: (id: string, req: AdminUpdateUserRequest) =>
+    api.put<UserResponse>(`/admin/users/${id}`, req).then(d),
+  activate: (id: string) =>
+    api.patch<void>(`/admin/users/${id}/activate`).then(() => undefined as void),
+  deactivate: (id: string) =>
+    api.patch<void>(`/admin/users/${id}/deactivate`).then(() => undefined as void),
+  getById: (id: string) =>
+    api.get<UserResponse>(`/admin/users/${id}`).then(d),
+  getAll: (p?: { page?: number; size?: number; sortBy?: string; sortDirection?: string }) =>
+    api.get<Page<UserResponse>>('/admin/users', { params: p }).then(d),
+  resetPassword: (id: string) =>
+    api.patch<void>(`/admin/users/${id}/reset-password`).then(() => undefined as void),
+}
+
+// ─── Profile ─────────────────────────────────────────────────────────────────
+export const profileService = {
+  get: () => api.get<UserResponse>('/profile').then(d),
+  update: (req: UserUpdateRequest) => api.put<UserResponse>('/profile', req).then(d),
+}
+
+// ─── Password reset ──────────────────────────────────────────────────────────
+export const passwordService = {
+  forgot: (req: ForgotPasswordRequest) =>
+    api.post<void>('/password/forgot', req).then(() => undefined as void),
+  reset: (userId: string) =>
+    api.patch<void>(`/password/reset/${userId}`).then(() => undefined as void),
+}
 
 // ─── Agencies ────────────────────────────────────────────────────────────────
 export const agencyService = {
@@ -73,6 +117,8 @@ export const ftthService = {
     api.get<FTTHLineResponse[]>('/lines/ftth', { params: p }).then(d),
   getById: (id: string) =>
     api.get<FTTHLineResponse>(`/lines/ftth/${id}`).then(d),
+  getByLineNumber: (n: string) =>
+    api.get<FTTHLineResponse>(`/lines/ftth/number/${n}`).then(d),
   getBillable: () =>
     api.get<FTTHLineResponse[]>('/lines/ftth/billable').then(d),
   create: (dto: FTTHLineCreateRequest) =>
@@ -91,6 +137,8 @@ export const rtcService = {
     api.get<RTCLineResponse[]>('/lines/rtc', { params: p }).then(d),
   getById: (id: string) =>
     api.get<RTCLineResponse>(`/lines/rtc/${id}`).then(d),
+  getByLineNumber: (n: string) =>
+    api.get<RTCLineResponse>(`/lines/rtc/number/${n}`).then(d),
   getBillable: () =>
     api.get<RTCLineResponse[]>('/lines/rtc/billable').then(d),
   create: (dto: RTCLineCreateRequest) =>
@@ -109,6 +157,8 @@ export const vpnService = {
     api.get<VPNLineResponse[]>('/lines/vpn-adsl', { params: p }).then(d),
   getById: (id: string) =>
     api.get<VPNLineResponse>(`/lines/vpn-adsl/${id}`).then(d),
+  getByLineNumber: (n: string) =>
+    api.get<VPNLineResponse>(`/lines/vpn-adsl/number/${n}`).then(d),
   getBillable: () =>
     api.get<VPNLineResponse[]>('/lines/vpn-adsl/billable').then(d),
   create: (dto: VPNLineCreateRequest) =>
@@ -123,10 +173,12 @@ export const vpnService = {
 
 // ─── GSM Pro Lines ────────────────────────────────────────────────────────────
 export const gsmService = {
-  getAll: (p?: { lineNumber?: string; lineStatus?: LineStatus; serviceFunction?: string; chipSerialNumber?: string; pinCode?: string; pukCode?: string }) =>
+  getAll: (p?: { lineNumber?: string; lineStatus?: LineStatus; serviceFunction?: string; chipSerialNumber?: string; chipDeliveryDateFrom?: string; chipDeliveryDateTo?: string; pinCode?: string; pukCode?: string }) =>
     api.get<GSMLineResponse[]>('/lines/gsm', { params: p }).then(d),
   getById: (id: string) =>
     api.get<GSMLineResponse>(`/lines/gsm/${id}`).then(d),
+  getByLineNumber: (n: string) =>
+    api.get<GSMLineResponse>(`/lines/gsm/number/${n}`).then(d),
   getBillable: () =>
     api.get<GSMLineResponse[]>('/lines/gsm/billable').then(d),
   create: (dto: GSMLineCreateRequest) =>
@@ -141,10 +193,12 @@ export const gsmService = {
 
 // ─── 4G Internet Lines ────────────────────────────────────────────────────────
 export const internet4GService = {
-  getAll: (p?: { lineNumber?: string; lineStatus?: LineStatus; serviceFunction?: string; simSerialNumber?: string; equipment?: string; bandwidth?: string }) =>
+  getAll: (p?: { lineNumber?: string; lineStatus?: LineStatus; serviceFunction?: string; simSerialNumber?: string; pinCode?: string; pukCode?: string; equipment?: string; equipmentSerialNumber?: string; bandwidth?: string }) =>
     api.get<Internet4GLineResponse[]>('/lines/4g-internet', { params: p }).then(d),
   getById: (id: string) =>
     api.get<Internet4GLineResponse>(`/lines/4g-internet/${id}`).then(d),
+  getByLineNumber: (n: string) =>
+    api.get<Internet4GLineResponse>(`/lines/4g-internet/number/${n}`).then(d),
   getBillable: () =>
     api.get<Internet4GLineResponse[]>('/lines/4g-internet/billable').then(d),
   create: (dto: Internet4GLineCreateRequest) =>
@@ -159,10 +213,12 @@ export const internet4GService = {
 
 // ─── VPN 4G Lines ─────────────────────────────────────────────────────────────
 export const vpn4GService = {
-  getAll: (p?: { lineNumber?: string; lineStatus?: LineStatus; equipment?: string; ipAddress?: string; serialNumber?: string }) =>
+  getAll: (p?: { lineNumber?: string; lineStatus?: LineStatus; equipment?: string; ipAddress?: string; serialNumber?: string; deliveryDateFrom?: string; deliveryDateTo?: string }) =>
     api.get<VPN4GLineResponse[]>('/lines/4g-vpn', { params: p }).then(d),
   getById: (id: string) =>
     api.get<VPN4GLineResponse>(`/lines/4g-vpn/${id}`).then(d),
+  getByLineNumber: (n: string) =>
+    api.get<VPN4GLineResponse>(`/lines/4g-vpn/number/${n}`).then(d),
   getBillable: () =>
     api.get<VPN4GLineResponse[]>('/lines/4g-vpn/billable').then(d),
   create: (dto: VPN4GLineCreateRequest) =>

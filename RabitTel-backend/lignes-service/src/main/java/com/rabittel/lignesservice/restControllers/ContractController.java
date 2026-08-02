@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -25,6 +26,7 @@ public class ContractController {
 
     private final ContractService contractService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Créer un nouveau contrat")
@@ -32,13 +34,14 @@ public class ContractController {
         return contractService.createContract(dto);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/renew")
     @Operation(summary = "Renouveler un contrat existant")
     public ContractResponseDTO renew(@PathVariable UUID id, @Valid @RequestBody ContractRenewalRequestDTO dto) {
         return contractService.renewContract(id, dto);
     }
 
-    // TODO: @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Supprimer un contrat (si aucune ligne associée)")
@@ -74,18 +77,21 @@ public class ContractController {
         return contractService.getActiveContracts();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/expired")
     @Operation(summary = "Lister les contrats expirés")
     public List<ContractResponseDTO> findExpired() {
         return contractService.getExpiredContracts();
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/expiring")
     @Operation(summary = "Lister les contrats arrivant à expiration avant N jours")
     public List<ContractResponseDTO> findExpiring(@RequestParam(defaultValue = "30") int daysThreshold) {
         return contractService.getExpiringContracts(daysThreshold);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/{id}/days-until-expiration")
     @Operation(summary = "Nombre de jours restants avant l'expiration d'un contrat")
     public Long daysUntilExpiration(@PathVariable UUID id) {

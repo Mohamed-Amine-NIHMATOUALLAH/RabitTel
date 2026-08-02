@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,7 +25,7 @@ public class AgencyController {
 
     private final AgencyService agencyService;
 
-    // TODO: @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Créer une nouvelle agence")
@@ -32,14 +33,14 @@ public class AgencyController {
         return agencyService.createAgency(dto);
     }
 
-    // TODO: @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     @Operation(summary = "Modifier une agence existante")
     public AgencyResponseDTO update(@PathVariable UUID id, @Valid @RequestBody AgencyUpdateRequestDTO dto) {
         return agencyService.updateAgency(id, dto);
     }
 
-    // TODO: @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}/deactivate")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Désactiver une agence (soft delete)")
@@ -47,7 +48,7 @@ public class AgencyController {
         agencyService.softDeleteAgency(id);
     }
 
-    // TODO: @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Supprimer définitivement une agence désactivée")
