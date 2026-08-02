@@ -82,9 +82,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         // Public endpoints
-                        .requestMatchers(
-                                "/api/auth/**"
-                        ).permitAll()
+                        .requestMatchers("/api/auth/login").permitAll()
 
 
                         // Admin endpoints

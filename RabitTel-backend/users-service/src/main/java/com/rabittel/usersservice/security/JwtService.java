@@ -1,5 +1,6 @@
 package com.rabittel.usersservice.security;
 
+import com.rabittel.usersservice.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -89,5 +90,12 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    public String generateToken(User user, UserDetails userDetails) {
+        Map<String, Object> extraClaims = new HashMap<>();
+        extraClaims.put("userId", user.getId().toString());
+        extraClaims.put("role", user.getRole().name());
+        return generateToken(extraClaims, userDetails);
     }
 }
