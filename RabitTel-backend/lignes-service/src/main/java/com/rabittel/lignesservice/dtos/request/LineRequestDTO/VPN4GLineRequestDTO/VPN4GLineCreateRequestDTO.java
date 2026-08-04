@@ -1,4 +1,7 @@
 package com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPN4GLineRequestDTO;
+import com.rabittel.lignesservice.validation.annotations.Alphanumeric;
+import com.rabittel.lignesservice.validation.annotations.Ipv4;
+import com.rabittel.lignesservice.validation.annotations.MoroccanPhoneNumber;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,6 +20,7 @@ import java.util.UUID;
 public class VPN4GLineCreateRequestDTO {
 
     @NotBlank
+    @MoroccanPhoneNumber(prefix = '6')
     private String lineNumber;
 
     @NotNull
@@ -26,16 +30,16 @@ public class VPN4GLineCreateRequestDTO {
     @NotNull
     private UUID agencyId;
 
-    @NotNull
-    private UUID planId;
-
     @NotBlank
+    @Alphanumeric
     private String equipment;
 
     @NotBlank
+    @Ipv4
     private String ipAddress;
 
     @NotBlank
+    @Alphanumeric
     private String serialNumber;
 
     @NotNull

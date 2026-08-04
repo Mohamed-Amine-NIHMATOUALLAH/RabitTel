@@ -8,6 +8,7 @@ import com.rabittel.lignesservice.exceptions.BusinessRuleException;
 import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.PlanMapper;
+import com.rabittel.lignesservice.repositories.GSMLineRepository;
 import com.rabittel.lignesservice.repositories.PlanRepository;
 import com.rabittel.lignesservice.services.interfaces.PlanService;
 import com.rabittel.lignesservice.specifications.PlanSpecification;
@@ -26,6 +27,13 @@ import java.util.stream.Collectors;
 public class PlanServiceImpl implements PlanService {
     private final PlanRepository planRepository;
     private final PlanMapper planMapper;
+    private final GSMLineRepository gsmLineRepository;
+
+    private PlanResponseDTO mapToResponse(Plan plan) {
+        PlanResponseDTO dto = planMapper.toPlanResponseDTO(plan);
+        dto.setLinesCount(gsmLineRepository.countByPlanId(plan.getId()));
+        return dto;
+    }
 
     @Transactional
     public PlanResponseDTO createPlan(PlanCreateRequestDTO  planCreateRequestDTO) {
@@ -34,7 +42,7 @@ public class PlanServiceImpl implements PlanService {
         }
         Plan plan = planMapper.toEntity(planCreateRequestDTO);
         Plan savedPlan = planRepository.save(plan);
-        return planMapper.toPlanResponseDTO(savedPlan);
+        return mapToResponse(savedPlan);
     }
 
     @Transactional
@@ -61,7 +69,7 @@ public class PlanServiceImpl implements PlanService {
 
         Plan updatedPlan = planRepository.save(plan);
 
-        return planMapper.toPlanResponseDTO(updatedPlan);
+        return mapToResponse(updatedPlan);
     }
 
     @Transactional
@@ -69,7 +77,7 @@ public class PlanServiceImpl implements PlanService {
         Plan plan = planRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Plan with id " + id + " not found."));
-        if (!plan.getLines().isEmpty()) {
+        if (gsmLineRepository.countByPlanId(id) > 0) {
             throw new BusinessRuleException("Cannot delete plan with id " + id + " because it is associated with existing lines.");
         }
         if (plan.getActive()) {
@@ -83,26 +91,25 @@ public class PlanServiceImpl implements PlanService {
         Plan plan = planRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Plan with id " + id + " not found."));
-        return planMapper.toPlanResponseDTO(plan);
+        return mapToResponse(plan);
     }
 
     @Transactional
     public List<PlanResponseDTO> getAllPlans() {
         return planRepository.findAll().stream()
-                .map(planMapper::toPlanResponseDTO)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public List<PlanResponseDTO> searchPlans(Boolean active, String name, BigDecimal priceFrom, BigDecimal priceTo) {
-        Specification<Plan> spec = Specification
-                .<Plan>where(PlanSpecification.hasActive(active))
+        Specification<Plan> spec = PlanSpecification.hasActive(active)
                 .and(PlanSpecification.nameContains(name))
                 .and(PlanSpecification.priceFrom(priceFrom))
                 .and(PlanSpecification.priceTo(priceTo));
 
         return planRepository.findAll(spec).stream()
-                .map(planMapper::toPlanResponseDTO)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 }

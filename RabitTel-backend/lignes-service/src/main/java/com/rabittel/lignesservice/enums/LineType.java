@@ -5,6 +5,9 @@ public enum LineType {
     FTTH("FTTH"),
     RTC("RTC"),
     VPN_ADSL("VPN ADSL"),
+    ADSL("ADSL"),
+    LLI("LLI"),
+    VPN_LL("VPN LL"),
     G4("4G"),
     G4_VPN("4G VPN"),
     GSM_PRO("GSM Pro");

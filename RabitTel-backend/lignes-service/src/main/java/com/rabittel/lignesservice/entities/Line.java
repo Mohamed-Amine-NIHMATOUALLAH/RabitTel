@@ -53,11 +53,6 @@ public abstract class Line {
     @JoinColumn(name = "agency_id", nullable = false)
     private Agency agency;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "plan_id", nullable = false)
-    private Plan plan;
-
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_id")

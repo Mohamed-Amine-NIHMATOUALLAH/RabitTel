@@ -14,6 +14,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GSMLineResponseDTO extends LineResponseDTO {
+    private java.util.UUID planId;
+    private String planName;
     private String serviceFunction;
     private String chipSerialNumber;
     private LocalDate chipDeliveryDate;

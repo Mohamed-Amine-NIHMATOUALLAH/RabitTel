@@ -1,6 +1,6 @@
 package com.rabittel.lignesservice.repositories;
 
-import com.rabittel.lignesservice.entities.VPNLine;
+import com.rabittel.lignesservice.entities.DataLine;
 import com.rabittel.lignesservice.enums.LineStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -12,10 +12,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface VPNLineRepository extends JpaRepository<VPNLine, UUID>, JpaSpecificationExecutor<VPNLine> {
+public interface DataLineRepository extends JpaRepository<DataLine, UUID>, JpaSpecificationExecutor<DataLine> {
     boolean existsByLineNumber(String lineNumber);
     boolean existsByIpAddress(String ipAddress);
-    Optional<VPNLine> findByLineNumber(String lineNumber);
+    Optional<DataLine> findByLineNumber(String lineNumber);
 
-    List<VPNLine> findByLineStatus(LineStatus lineStatus);
+    List<DataLine> findByLineStatus(LineStatus lineStatus);
 }

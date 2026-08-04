@@ -63,7 +63,7 @@ public class Internet4GLineController {
             @RequestParam(required = false) String pukCode,
             @RequestParam(required = false) String equipment,
             @RequestParam(required = false) String equipmentSerialNumber,
-            @RequestParam(required = false) Long bandwidth
+            @RequestParam(required = false) String bandwidth
     ) {
         if (lineNumber == null && lineStatus == null && serviceFunction == null && simSerialNumber == null
                 && pinCode == null && pukCode == null && equipment == null

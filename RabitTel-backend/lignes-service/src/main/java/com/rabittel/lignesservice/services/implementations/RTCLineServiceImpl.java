@@ -4,7 +4,6 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.RTCLineRequestDTO.
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.RTCLineRequestDTO.RTCLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.RTCLineResponseDTO;
 import com.rabittel.lignesservice.entities.Agency;
-import com.rabittel.lignesservice.entities.Plan;
 import com.rabittel.lignesservice.entities.RTCLine;
 import com.rabittel.lignesservice.enums.LineStatus;
 import com.rabittel.lignesservice.enums.LineType;
@@ -14,6 +13,7 @@ import com.rabittel.lignesservice.mappers.RTCLineMapper;
 import com.rabittel.lignesservice.repositories.RTCLineRepository;
 import com.rabittel.lignesservice.services.interfaces.RTCLineService;
 import com.rabittel.lignesservice.specifications.LineSpecification;
+import com.rabittel.lignesservice.validation.LineValueUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -28,10 +28,11 @@ public class RTCLineServiceImpl implements RTCLineService {
     private final RTCLineRepository rtcLineRepository;
     private final RTCLineMapper rtcLineMapper;
     private final com.rabittel.lignesservice.repositories.AgencyRepository agencyRepository;
-    private final com.rabittel.lignesservice.repositories.PlanRepository planRepository;
     private final com.rabittel.lignesservice.repositories.ContractRepository contractRepository;
 
     public RTCLineResponseDTO createRTCLine(RTCLineCreateRequestDTO createRequestDTO) {
+        createRequestDTO.setLineNumber(normalizeRtcLineNumber(createRequestDTO.getLineNumber()));
+
         if (rtcLineRepository.existsByLineNumber(createRequestDTO.getLineNumber())) {
             throw new ResourceAlreadyExistsException("RTC Line with number " + createRequestDTO.getLineNumber() + " already exists.");
         }
@@ -40,11 +41,8 @@ public class RTCLineServiceImpl implements RTCLineService {
 
         Agency agency = agencyRepository.findById(createRequestDTO.getAgencyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
-        Plan plan = planRepository.findById(createRequestDTO.getPlanId())
-                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
 
         rtcLine.setAgency(agency);
-        rtcLine.setPlan(plan);
 
         rtcLine.setLineType(LineType.RTC);
         rtcLine.setLineStatus(LineStatus.ACTIVE);
@@ -61,6 +59,10 @@ public class RTCLineServiceImpl implements RTCLineService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "RTC Line with id " + id + " not found."
                 ));
+
+        if (updateRequestDTO.getLineNumber() != null) {
+            updateRequestDTO.setLineNumber(normalizeRtcLineNumber(updateRequestDTO.getLineNumber()));
+        }
 
         // Vérification de l'unicité du numéro avant le mapper
         if (updateRequestDTO.getLineNumber() != null
@@ -84,14 +86,6 @@ public class RTCLineServiceImpl implements RTCLineService {
                             "Agency with id " + updateRequestDTO.getAgencyId() + " not found."
                     ));
             rtcLine.setAgency(agency);
-        }
-
-        if (updateRequestDTO.getPlanId() != null) {
-            var plan = planRepository.findById(updateRequestDTO.getPlanId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Plan with id " + updateRequestDTO.getPlanId() + " not found."
-                    ));
-            rtcLine.setPlan(plan);
         }
 
         if (updateRequestDTO.getContractId() != null) {
@@ -151,7 +145,7 @@ public class RTCLineServiceImpl implements RTCLineService {
     }
 
     public RTCLineResponseDTO getRTCLineByLineNumber(String lineNumber) {
-        RTCLine rtcLine = rtcLineRepository.findByLineNumber(lineNumber)
+        RTCLine rtcLine = rtcLineRepository.findByLineNumber(normalizeRtcLineNumber(lineNumber))
             .orElseThrow(() -> new ResourceNotFoundException("RTC Line with number " + lineNumber + " not found."));
         return rtcLineMapper.toRTCLineResponseDTO(rtcLine);
     }
@@ -169,12 +163,17 @@ public class RTCLineServiceImpl implements RTCLineService {
     }
 
     public List<RTCLineResponseDTO> searchRTCLines(String lineNumber, LineStatus lineStatus) {
-        Specification<RTCLine> spec = Specification
-                .<RTCLine>where(LineSpecification.hasLineNumber(lineNumber))
+        Specification<RTCLine> spec = LineSpecification.<RTCLine>hasLineNumber(
+                        lineNumber == null ? null : normalizeRtcLineNumber(lineNumber)
+                )
                 .and(LineSpecification.hasLineStatus(lineStatus));
 
         return rtcLineRepository.findAll(spec).stream()
                 .map(rtcLineMapper::toRTCLineResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    private String normalizeRtcLineNumber(String lineNumber) {
+        return LineValueUtils.normalizeMoroccanPhoneNumber(lineNumber, '5');
     }
 }

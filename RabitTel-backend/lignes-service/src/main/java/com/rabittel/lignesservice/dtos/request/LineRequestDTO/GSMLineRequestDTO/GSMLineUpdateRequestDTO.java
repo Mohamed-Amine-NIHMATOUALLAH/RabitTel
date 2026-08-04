@@ -1,7 +1,10 @@
 package com.rabittel.lignesservice.dtos.request.LineRequestDTO.GSMLineRequestDTO;
 
+import com.rabittel.lignesservice.validation.annotations.DigitsOnly;
+import com.rabittel.lignesservice.validation.annotations.MoroccanPhoneNumber;
 import com.rabittel.lignesservice.enums.LineStatus;
 import com.rabittel.lignesservice.enums.LineType;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +19,7 @@ import java.util.UUID;
 public class GSMLineUpdateRequestDTO {
 
     // Base line fields (optional to allow partial updates)
+    @MoroccanPhoneNumber(prefix = '6')
     private String lineNumber;
     private LineType lineType;
     private LineStatus lineStatus;
@@ -26,8 +30,13 @@ public class GSMLineUpdateRequestDTO {
 
     // GSM specific
     private String serviceFunction;
+    @DigitsOnly
     private String chipSerialNumber;
     private LocalDate chipDeliveryDate;
+    @DigitsOnly
+    @Size(min = 4, max = 4)
     private String pinCode;
+    @DigitsOnly
+    @Size(min = 8, max = 8)
     private String pukCode;
 }

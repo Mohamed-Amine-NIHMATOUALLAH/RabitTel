@@ -5,14 +5,13 @@ import com.rabittel.lignesservice.dtos.request.PlanRequestDTO.PlanUpdateRequestD
 import com.rabittel.lignesservice.dtos.response.PlanResponseDTO;
 import com.rabittel.lignesservice.entities.Plan;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface PlanMapper {
 
-    // Entity -> Response DTO
-    @Mapping(target = "linesCount", expression = "java(plan.getLines() != null ? plan.getLines().size() : 0L)")
+    // Entity -> Response DTO (linesCount must be set by the service)
     PlanResponseDTO toPlanResponseDTO(Plan plan);
 
     // Create DTO -> Entity

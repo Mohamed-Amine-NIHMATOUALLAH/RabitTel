@@ -137,7 +137,6 @@ export default function LinePage<T extends LineResponse, C, U>({
             <th>État</th>
             <th>Montant</th>
             <th>Direction</th>
-            <th>Forfait</th>
             <th>Fin engagement</th>
             {extraColumns.map(c => <th key={c.header}>{c.header}</th>)}
             <th>Actions</th>
@@ -150,7 +149,6 @@ export default function LinePage<T extends LineResponse, C, U>({
               <td>{row.lineStatus}</td>
               <td>{row.contractualAmount}</td>
               <td>{row.agencyName}</td>
-              <td>{row.planName}</td>
               <td>{row.contractEndDate ?? <em style={{ color: '#999' }}>Non assigné</em>}</td>
               {extraColumns.map(c => <td key={c.header}>{c.cell(row)}</td>)}
               <td>
@@ -166,7 +164,7 @@ export default function LinePage<T extends LineResponse, C, U>({
               </td>
             </tr>
           ))}
-          {displayed.length === 0 && <tr><td colSpan={7 + extraColumns.length}>Aucune ligne trouvée</td></tr>}
+          {displayed.length === 0 && <tr><td colSpan={6 + extraColumns.length}>Aucune ligne trouvée</td></tr>}
         </tbody>
       </table>
 

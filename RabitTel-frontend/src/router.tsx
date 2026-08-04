@@ -10,7 +10,10 @@ import Users from './pages/Users'
 import Profile from './pages/Profile'
 import FTTHLines from './pages/lines/FTTHLines'
 import RTCLines from './pages/lines/RTCLines'
-import VPNLines from './pages/lines/VPNLines'
+import VPNAdslLines from './pages/lines/DataLines'
+import AdslLines from './pages/lines/AdslLines'
+import LLILines from './pages/lines/LLILines'
+import VPNLLLines from './pages/lines/VPNLLLines'
 import GSMLines from './pages/lines/GSMLines'
 import Internet4GLines from './pages/lines/Internet4GLines'
 import VPN4GLines from './pages/lines/VPN4GLines'
@@ -46,7 +49,10 @@ export const router = createBrowserRouter([
       { path: 'lines', element: <LinesOverview /> },
       { path: 'lines/ftth', element: <FTTHLines /> },
       { path: 'lines/rtc', element: <RTCLines /> },
-      { path: 'lines/vpn', element: <VPNLines /> },
+      { path: 'lines/vpn-adsl', element: <VPNAdslLines /> },
+      { path: 'lines/adsl', element: <AdslLines /> },
+      { path: 'lines/lli', element: <LLILines /> },
+      { path: 'lines/vpn-ll', element: <VPNLLLines /> },
       { path: 'lines/gsm', element: <GSMLines /> },
       { path: 'lines/4g', element: <Internet4GLines /> },
       { path: 'lines/4g-vpn', element: <VPN4GLines /> },

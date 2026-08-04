@@ -9,6 +9,7 @@ import com.rabittel.lignesservice.exceptions.BusinessRuleException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.ContractMapper;
 import com.rabittel.lignesservice.repositories.ContractRepository;
+import com.rabittel.lignesservice.repositories.LineRepository;
 import com.rabittel.lignesservice.services.interfaces.ContractService;
 import com.rabittel.lignesservice.specifications.ContractSpecification;
 import jakarta.transaction.Transactional;
@@ -27,8 +28,16 @@ import java.util.stream.Collectors;
 public class ContractServiceImpl implements ContractService {
     private final ContractRepository contractRepository;
     private final ContractMapper contractMapper;
+    private final LineRepository lineRepository;
     private static final int MAX_CONTRACT_DURATION_MONTHS = 120;
 
+    private ContractResponseDTO mapToResponse(Contract contract) {
+        ContractResponseDTO dto = contractMapper.toContractResponseDTO(contract);
+        dto.setLinesCount(lineRepository.countByContractId(contract.getId()));
+        return dto;
+    }
+
+    @Transactional
     public ContractResponseDTO createContract(ContractCreateRequestDTO contractCreateRequestDTO) {
         if (contractCreateRequestDTO.getStartDate() == null) {
             throw new BusinessRuleException("Start date cannot be null");
@@ -54,9 +63,10 @@ public class ContractServiceImpl implements ContractService {
         contract.setStatus(ContractStatus.IN_PROGRESS);
 
         Contract savedContract = contractRepository.save(contract);
-        return contractMapper.toContractResponseDTO(savedContract);
+        return mapToResponse(savedContract);
     }
 
+    @Transactional
     public ContractResponseDTO renewContract(UUID id, ContractRenewalRequestDTO renewalRequestDTO) {
         Contract contract = findContractById(id);
 
@@ -94,13 +104,14 @@ public class ContractServiceImpl implements ContractService {
         }
 
         Contract updatedContract = contractRepository.save(contract);
-        return contractMapper.toContractResponseDTO(updatedContract);
+        return mapToResponse(updatedContract);
     }
 
+    @Transactional
     public void deleteContract(UUID id) {
         Contract contract = findContractById(id);
 
-        if (contract.getLines() != null && !contract.getLines().isEmpty()) {
+        if (lineRepository.countByContractId(id) > 0) {
             throw new BusinessRuleException(
                 "Cannot delete contract with associated lines - delete or transfer lines first");
         }
@@ -108,34 +119,40 @@ public class ContractServiceImpl implements ContractService {
         contractRepository.delete(contract);
     }
 
+    @Transactional
     public List<ContractResponseDTO> getAllContracts() {
         return contractRepository.findAll().stream()
-            .map(contractMapper::toContractResponseDTO)
+            .map(this::mapToResponse)
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public ContractResponseDTO getContractById(UUID id) {
         Contract contract = findContractById(id);
-        return contractMapper.toContractResponseDTO(contract);
+        return mapToResponse(contract);
     }
 
+    @Transactional
     public List<ContractResponseDTO> getContractsByStatus(ContractStatus status) {
         return contractRepository.findByStatus(status).stream()
-            .map(contractMapper::toContractResponseDTO)
+            .map(this::mapToResponse)
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<ContractResponseDTO> getActiveContracts() {
         List<ContractResponseDTO> activeContracts = getContractsByStatus(ContractStatus.IN_PROGRESS);
         activeContracts.addAll(getContractsByStatus(ContractStatus.RENEWED));
         return activeContracts;
     }
 
+    @Transactional
     public List<ContractResponseDTO> getExpiredContracts() {
 
         return getContractsByStatus(ContractStatus.EXPIRED);
     }
 
+    @Transactional
     public List<ContractResponseDTO> getExpiringContracts(int daysThreshold) {
         if(daysThreshold < 0){
             throw new BusinessRuleException(
@@ -143,31 +160,32 @@ public class ContractServiceImpl implements ContractService {
         }
         LocalDate thresholdDate = LocalDate.now().plusDays(daysThreshold);
         return contractRepository.findContractsExpiringBefore(thresholdDate).stream()
-            .map(contractMapper::toContractResponseDTO)
+            .map(this::mapToResponse)
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<ContractResponseDTO> getContractsByDateRange(LocalDate startDate, LocalDate endDate) {
         if(startDate.isAfter(endDate)){
             throw new BusinessRuleException(
                     "Start date cannot be after end date.");
         }
         return contractRepository.findContractsByDateRange(startDate, endDate).stream()
-            .map(contractMapper::toContractResponseDTO)
+            .map(this::mapToResponse)
             .collect(Collectors.toList());
     }
 
+    @Transactional
     public List<ContractResponseDTO> searchContracts(ContractStatus status, LocalDate startDateFrom, LocalDate startDateTo,
                                                      LocalDate endDateFrom, LocalDate endDateTo) {
-        Specification<Contract> spec = Specification
-            .<Contract>where(ContractSpecification.hasStatus(status))
+        Specification<Contract> spec = ContractSpecification.hasStatus(status)
             .and(ContractSpecification.startDateFrom(startDateFrom))
             .and(ContractSpecification.startDateTo(startDateTo))
             .and(ContractSpecification.endDateFrom(endDateFrom))
             .and(ContractSpecification.endDateTo(endDateTo));
 
         return contractRepository.findAll(spec).stream()
-            .map(contractMapper::toContractResponseDTO)
+            .map(this::mapToResponse)
             .collect(Collectors.toList());
     }
 

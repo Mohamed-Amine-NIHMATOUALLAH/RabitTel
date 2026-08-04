@@ -4,13 +4,16 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.GSMLineRequestDTO.
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.GSMLineRequestDTO.GSMLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.GSMLineResponseDTO;
 import com.rabittel.lignesservice.entities.GSMLine;
+import com.rabittel.lignesservice.validation.LineValueUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.BeanMapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.ReportingPolicy;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface GSMLineMapper {
 
     @Mapping(source = "agency.id", target = "agencyId")
@@ -27,4 +30,9 @@ public interface GSMLineMapper {
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromDto(GSMLineUpdateRequestDTO gsmLineUpdateRequestDTO, @MappingTarget GSMLine gsmLine);
+
+    @AfterMapping
+    default void formatResponse(@MappingTarget GSMLineResponseDTO dto) {
+        dto.setLineNumber(LineValueUtils.formatMoroccanPhoneNumber(dto.getLineNumber()));
+    }
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { rtcService } from '../../services'
-import type { RTCLineResponse, RTCLineCreateRequest, RTCLineUpdateRequest, AgencyResponse, PlanResponse, ContractResponse } from '../../types'
+import type { RTCLineResponse, RTCLineCreateRequest, RTCLineUpdateRequest, AgencyResponse, ContractResponse } from '../../types'
 import { LineStatus, LineType } from '../../types'
 import LinePage from './LinePage'
 import { useRefData } from './useRefData'
@@ -10,13 +10,13 @@ function CreateForm({ onSubmit, isPending, error, onCancel }: {
   onSubmit: (dto: RTCLineCreateRequest) => void
   isPending: boolean; error: unknown; onCancel: () => void
 }) {
-  const { agencies, plans } = useRefData()
-  const [f, setF] = useState({ lineNumber: '', contractualAmount: '', agencyId: '', planId: '' })
+  const { agencies } = useRefData()
+  const [f, setF] = useState({ lineNumber: '', contractualAmount: '', agencyId: '' })
   const [err, setErr] = useState('')
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!f.lineNumber || !f.contractualAmount || !f.agencyId || !f.planId) { setErr('Tous les champs sont obligatoires'); return }
-    onSubmit({ lineNumber: f.lineNumber, contractualAmount: Number(f.contractualAmount), agencyId: f.agencyId, planId: f.planId, lineType: LineType.RTC, lineStatus: LineStatus.ACTIVE })
+    if (!f.lineNumber || !f.contractualAmount || !f.agencyId) { setErr('Tous les champs sont obligatoires'); return }
+    onSubmit({ lineNumber: f.lineNumber, contractualAmount: Number(f.contractualAmount), agencyId: f.agencyId, lineType: LineType.RTC, lineStatus: LineStatus.ACTIVE })
   }
   return (
     <form onSubmit={handleSubmit}>
@@ -25,10 +25,6 @@ function CreateForm({ onSubmit, isPending, error, onCancel }: {
       <div><label>Direction (Agence)<br /><select value={f.agencyId} onChange={e => setF(p => ({ ...p, agencyId: e.target.value }))}>
         <option value="">-- sélectionner --</option>
         {agencies.map((a: AgencyResponse) => <option key={a.id} value={a.id}>{a.name}</option>)}
-      </select></label></div>
-      <div><label>Forfait<br /><select value={f.planId} onChange={e => setF(p => ({ ...p, planId: e.target.value }))}>
-        <option value="">-- sélectionner --</option>
-        {plans.map((pl: PlanResponse) => <option key={pl.id} value={pl.id}>{pl.name}</option>)}
       </select></label></div>
       {err && <p style={{ color: 'red' }}>{err}</p>}
       <ErrorMsg error={error} />
@@ -44,13 +40,12 @@ function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
   initial: RTCLineResponse; onSubmit: (dto: RTCLineUpdateRequest) => void
   isPending: boolean; error: unknown; onCancel: () => void
 }) {
-  const { agencies, plans, contracts } = useRefData()
+  const { agencies, contracts } = useRefData()
   const [f, setF] = useState({
     lineNumber: initial.lineNumber,
     lineStatus: initial.lineStatus,
     contractualAmount: String(initial.contractualAmount),
     agencyId: initial.agencyId,
-    planId: initial.planId,
     contractId: initial.contractId ?? '',
   })
   return (
@@ -62,9 +57,6 @@ function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
       <div><label>Montant contractuel<br /><input type="number" step="0.01" value={f.contractualAmount} onChange={e => setF(p => ({ ...p, contractualAmount: e.target.value }))} /></label></div>
       <div><label>Direction (Agence)<br /><select value={f.agencyId} onChange={e => setF(p => ({ ...p, agencyId: e.target.value }))}>
         {agencies.map((a: AgencyResponse) => <option key={a.id} value={a.id}>{a.name}</option>)}
-      </select></label></div>
-      <div><label>Forfait<br /><select value={f.planId} onChange={e => setF(p => ({ ...p, planId: e.target.value }))}>
-        {plans.map((pl: PlanResponse) => <option key={pl.id} value={pl.id}>{pl.name}</option>)}
       </select></label></div>
       <div><label>Contrat (optionnel)<br /><select value={f.contractId} onChange={e => setF(p => ({ ...p, contractId: e.target.value }))}>
         <option value="">Aucun</option>

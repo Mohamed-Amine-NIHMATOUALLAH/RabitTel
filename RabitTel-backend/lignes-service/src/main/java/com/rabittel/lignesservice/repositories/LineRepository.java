@@ -9,4 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface LineRepository extends JpaRepository<Line, UUID>, JpaSpecificationExecutor<Line> {
+    long countByAgencyId(UUID agencyId);
+    long countByContractId(UUID contractId);
 }

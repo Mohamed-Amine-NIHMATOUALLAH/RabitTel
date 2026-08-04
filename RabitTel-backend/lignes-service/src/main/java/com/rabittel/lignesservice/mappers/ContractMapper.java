@@ -6,12 +6,12 @@ import com.rabittel.lignesservice.dtos.request.ContractRequestDTO.ContractRenewa
 import com.rabittel.lignesservice.dtos.response.ContractResponseDTO;
 import com.rabittel.lignesservice.entities.Contract;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
-@Mapper(componentModel = "spring")
+import org.mapstruct.ReportingPolicy;
+
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ContractMapper {
-    // Entity -> Response DTO
-    @Mapping(target = "linesCount", expression = "java(contract.getLines() == null ? 0L : (long) contract.getLines().size())")
+    // Entity -> Response DTO (linesCount must be set by the service)
     ContractResponseDTO toContractResponseDTO(Contract contract);
 
     // Create DTO -> Entity

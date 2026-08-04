@@ -1,7 +1,8 @@
 import type { ContractResponse } from '../types'
 import { useQuery } from '@tanstack/react-query'
-import { agencyService, planService, contractService, ftthService, rtcService, vpnService, gsmService, internet4GService, vpn4GService } from '../services'
+import { agencyService, planService, contractService, ftthService, rtcService, dataLineService, gsmService, internet4GService, vpn4GService } from '../services'
 import ErrorMsg from '../components/ErrorMsg'
+import { LineType } from '../types'
 
 export default function Dashboard() {
   const agencies = useQuery({ queryKey: ['agencies'], queryFn: () => agencyService.getAll() })
@@ -10,7 +11,10 @@ export default function Dashboard() {
   const expiring = useQuery({ queryKey: ['contracts-expiring'], queryFn: () => contractService.getExpiring(30) })
   const ftth = useQuery({ queryKey: ['ftth'], queryFn: () => ftthService.getAll() })
   const rtc = useQuery({ queryKey: ['rtc'], queryFn: () => rtcService.getAll() })
-  const vpn = useQuery({ queryKey: ['vpn'], queryFn: () => vpnService.getAll() })
+  const vpnAdsl = useQuery({ queryKey: ['data-vpn-adsl'], queryFn: () => dataLineService.getAllByType(LineType.VPN_ADSL) })
+  const adsl = useQuery({ queryKey: ['data-adsl'], queryFn: () => dataLineService.getAllByType(LineType.ADSL) })
+  const lli = useQuery({ queryKey: ['data-lli'], queryFn: () => dataLineService.getAllByType(LineType.LLI) })
+  const vpnLl = useQuery({ queryKey: ['data-vpn-ll'], queryFn: () => dataLineService.getAllByType(LineType.VPN_LL) })
   const gsm = useQuery({ queryKey: ['gsm'], queryFn: () => gsmService.getAll() })
   const g4 = useQuery({ queryKey: ['4g'], queryFn: () => internet4GService.getAll() })
   const g4vpn = useQuery({ queryKey: ['4g-vpn'], queryFn: () => vpn4GService.getAll() })
@@ -18,7 +22,10 @@ export default function Dashboard() {
   const totalLines =
     (ftth.data?.length ?? 0) +
     (rtc.data?.length ?? 0) +
-    (vpn.data?.length ?? 0) +
+    (vpnAdsl.data?.length ?? 0) +
+    (adsl.data?.length ?? 0) +
+    (lli.data?.length ?? 0) +
+    (vpnLl.data?.length ?? 0) +
     (gsm.data?.length ?? 0) +
     (g4.data?.length ?? 0) +
     (g4vpn.data?.length ?? 0)
@@ -50,7 +57,10 @@ export default function Dashboard() {
           </tr>
           <tr><td>FTTH</td><td>{ftth.data?.length ?? '-'}</td></tr>
           <tr><td>RTC</td><td>{rtc.data?.length ?? '-'}</td></tr>
-          <tr><td>VPN ADSL</td><td>{vpn.data?.length ?? '-'}</td></tr>
+          <tr><td>VPN ADSL</td><td>{vpnAdsl.data?.length ?? '-'}</td></tr>
+          <tr><td>ADSL</td><td>{adsl.data?.length ?? '-'}</td></tr>
+          <tr><td>LLI</td><td>{lli.data?.length ?? '-'}</td></tr>
+          <tr><td>VPN LL</td><td>{vpnLl.data?.length ?? '-'}</td></tr>
           <tr><td>GSM Pro</td><td>{gsm.data?.length ?? '-'}</td></tr>
           <tr><td>4G Internet</td><td>{g4.data?.length ?? '-'}</td></tr>
           <tr><td>4G VPN</td><td>{g4vpn.data?.length ?? '-'}</td></tr>

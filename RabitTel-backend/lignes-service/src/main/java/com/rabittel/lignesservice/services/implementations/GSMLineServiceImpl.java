@@ -15,6 +15,7 @@ import com.rabittel.lignesservice.repositories.GSMLineRepository;
 import com.rabittel.lignesservice.services.interfaces.GSMLineService;
 import com.rabittel.lignesservice.specifications.GSMLineSpecification;
 import com.rabittel.lignesservice.specifications.LineSpecification;
+import com.rabittel.lignesservice.validation.LineValueUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -33,7 +34,10 @@ public class GSMLineServiceImpl implements GSMLineService {
     private final com.rabittel.lignesservice.repositories.ContractRepository contractRepository;
 
     public GSMLineResponseDTO createGSMLine(GSMLineCreateRequestDTO createRequestDTO) {
-        if (gsmLineRepository.existsByLineNumber(createRequestDTO.getLineNumber())) {
+        String normalizedLineNumber = normalizeGsmLineNumber(createRequestDTO.getLineNumber());
+        createRequestDTO.setLineNumber(normalizedLineNumber);
+
+        if (gsmLineRepository.existsByLineNumber(normalizedLineNumber)) {
             throw new ResourceAlreadyExistsException("GSM Line with number " + createRequestDTO.getLineNumber() + " already exists.");
         }
 
@@ -63,6 +67,10 @@ public class GSMLineServiceImpl implements GSMLineService {
     public GSMLineResponseDTO updateGSMLine(UUID id, GSMLineUpdateRequestDTO updateRequestDTO) {
         GSMLine gsmLine = gsmLineRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("GSM Line with id " + id + " not found."));
+
+        if (updateRequestDTO.getLineNumber() != null) {
+            updateRequestDTO.setLineNumber(normalizeGsmLineNumber(updateRequestDTO.getLineNumber()));
+        }
 
 
         // check chip serial uniqueness only if new value provided
@@ -165,7 +173,7 @@ public class GSMLineServiceImpl implements GSMLineService {
     }
 
     public GSMLineResponseDTO getGSMLineByLineNumber(String lineNumber) {
-        GSMLine gsmLine = gsmLineRepository.findByLineNumber(lineNumber)
+        GSMLine gsmLine = gsmLineRepository.findByLineNumber(normalizeGsmLineNumber(lineNumber))
             .orElseThrow(() -> new ResourceNotFoundException("GSM Line with number " + lineNumber + " not found."));
         return gsmLineMapper.toGSMLineResponseDTO(gsmLine);
     }
@@ -174,8 +182,9 @@ public class GSMLineServiceImpl implements GSMLineService {
                                                    String serviceFunction, String chipSerialNumber,
                                                    java.time.LocalDate chipDeliveryDateFrom, java.time.LocalDate chipDeliveryDateTo,
                                                    String pinCode, String pukCode) {
-        Specification<GSMLine> spec = Specification
-                .<GSMLine>where(LineSpecification.hasLineNumber(lineNumber))
+        Specification<GSMLine> spec = LineSpecification.<GSMLine>hasLineNumber(
+                        lineNumber == null ? null : normalizeGsmLineNumber(lineNumber)
+                )
                 .and(LineSpecification.hasLineStatus(lineStatus))
                 .and(GSMLineSpecification.hasServiceFunction(serviceFunction))
                 .and(GSMLineSpecification.hasChipSerialNumber(chipSerialNumber))
@@ -187,6 +196,10 @@ public class GSMLineServiceImpl implements GSMLineService {
         return gsmLineRepository.findAll(spec).stream()
                 .map(gsmLineMapper::toGSMLineResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    private String normalizeGsmLineNumber(String lineNumber) {
+        return LineValueUtils.normalizeMoroccanPhoneNumber(lineNumber, '6');
     }
 
 

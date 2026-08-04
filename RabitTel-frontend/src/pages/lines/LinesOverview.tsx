@@ -1,14 +1,17 @@
 import { useQueries } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
-import { ftthService, rtcService, vpnService, gsmService, internet4GService, vpn4GService } from '../../services'
+import { ftthService, rtcService, dataLineService, gsmService, internet4GService, vpn4GService } from '../../services'
 import { LineType } from '../../types'
 
 const LINE_TYPES: { label: string; to: string; type: LineType; fn: () => Promise<unknown[]>; color: string; icon: string }[] = [
   { label: 'FTTH', to: '/lines/ftth', type: LineType.FTTH, fn: () => ftthService.getAll(), color: '#2563eb', icon: '🔌' },
   { label: 'RTC', to: '/lines/rtc', type: LineType.RTC, fn: () => rtcService.getAll(), color: '#16a34a', icon: '☎️' },
+  { label: 'VPN ADSL', to: '/lines/vpn-adsl', type: LineType.VPN_ADSL, fn: () => dataLineService.getAllByType(LineType.VPN_ADSL), color: '#0891b2', icon: '🔒' },
+  { label: 'ADSL', to: '/lines/adsl', type: LineType.ADSL, fn: () => dataLineService.getAllByType(LineType.ADSL), color: '#0e7490', icon: '🌐' },
+  { label: 'LLI', to: '/lines/lli', type: LineType.LLI, fn: () => dataLineService.getAllByType(LineType.LLI), color: '#155e75', icon: '📶' },
+  { label: 'VPN LL', to: '/lines/vpn-ll', type: LineType.VPN_LL, fn: () => dataLineService.getAllByType(LineType.VPN_LL), color: '#164e63', icon: '🛡️' },
   { label: 'GSM Pro', to: '/lines/gsm', type: LineType.GSM_PRO, fn: () => gsmService.getAll(), color: '#9333ea', icon: '📱' },
   { label: '4G Internet', to: '/lines/4g', type: LineType.G4, fn: () => internet4GService.getAll(), color: '#ea580c', icon: '🛰️' },
-  { label: 'VPN ADSL', to: '/lines/vpn', type: LineType.VPN_ADSL, fn: () => vpnService.getAll(), color: '#0891b2', icon: '🔒' },
   { label: '4G VPN', to: '/lines/4g-vpn', type: LineType.G4_VPN, fn: () => vpn4GService.getAll(), color: '#be123c', icon: '🔐' },
 ]
 

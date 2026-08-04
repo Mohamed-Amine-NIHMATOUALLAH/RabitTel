@@ -36,5 +36,5 @@ public interface Internet4GLineService {
             String pukCode,
             String equipment,
             String equipmentSerialNumber,
-            Long bandwidth);
+            String bandwidth);
 }

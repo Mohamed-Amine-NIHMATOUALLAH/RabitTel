@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { internet4GService } from '../../services'
-import type { Internet4GLineResponse, Internet4GLineCreateRequest, Internet4GLineUpdateRequest, AgencyResponse, PlanResponse, ContractResponse } from '../../types'
-import { LineStatus, LineType } from '../../types'
+import type { Internet4GLineResponse, Internet4GLineCreateRequest, Internet4GLineUpdateRequest, AgencyResponse, ContractResponse } from '../../types'
+import { LineStatus, LineType, INTERNET_4G_BANDWIDTH_OPTIONS } from '../../types'
 import LinePage from './LinePage'
 import { useRefData } from './useRefData'
 import ErrorMsg from '../../components/ErrorMsg'
@@ -9,19 +9,19 @@ import ErrorMsg from '../../components/ErrorMsg'
 function CreateForm({ onSubmit, isPending, error, onCancel }: {
   onSubmit: (dto: Internet4GLineCreateRequest) => void; isPending: boolean; error: unknown; onCancel: () => void
 }) {
-  const { agencies, plans } = useRefData()
+  const { agencies } = useRefData()
   const [f, setF] = useState({
-    lineNumber: '', contractualAmount: '', agencyId: '', planId: '',
+    lineNumber: '', contractualAmount: '', agencyId: '',
     serviceFunction: '', simSerialNumber: '', pinCode: '', pukCode: '',
     equipment: '', equipmentSerialNumber: '', bandwidth: ''
   })
   const [err, setErr] = useState('')
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!f.lineNumber || !f.contractualAmount || !f.agencyId || !f.planId || !f.serviceFunction || !f.simSerialNumber || !f.pinCode || !f.pukCode || !f.equipment || !f.equipmentSerialNumber || !f.bandwidth) {
+    if (!f.lineNumber || !f.contractualAmount || !f.agencyId || !f.serviceFunction || !f.simSerialNumber || !f.pinCode || !f.pukCode || !f.equipment || !f.equipmentSerialNumber || !f.bandwidth) {
       setErr('Tous les champs sont obligatoires'); return
     }
-    onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), bandwidth: Number(f.bandwidth), lineType: LineType.G4, lineStatus: LineStatus.ACTIVE })
+    onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), bandwidth: f.bandwidth, lineType: LineType.G4, lineStatus: LineStatus.ACTIVE })
   }
   return (
     <form onSubmit={handleSubmit}>
@@ -31,17 +31,16 @@ function CreateForm({ onSubmit, isPending, error, onCancel }: {
         <option value="">-- sélectionner --</option>
         {agencies.map((a: AgencyResponse) => <option key={a.id} value={a.id}>{a.name}</option>)}
       </select></label></div>
-      <div><label>Forfait<br /><select value={f.planId} onChange={e => setF(p => ({ ...p, planId: e.target.value }))}>
-        <option value="">-- sélectionner --</option>
-        {plans.map((pl: PlanResponse) => <option key={pl.id} value={pl.id}>{pl.name}</option>)}
-      </select></label></div>
       <div><label>Affectation / Fonction<br /><input value={f.serviceFunction} onChange={e => setF(p => ({ ...p, serviceFunction: e.target.value }))} /></label></div>
       <div><label>N° Série SIM<br /><input value={f.simSerialNumber} onChange={e => setF(p => ({ ...p, simSerialNumber: e.target.value }))} /></label></div>
       <div><label>Code PIN<br /><input value={f.pinCode} onChange={e => setF(p => ({ ...p, pinCode: e.target.value }))} /></label></div>
       <div><label>Code PUK<br /><input value={f.pukCode} onChange={e => setF(p => ({ ...p, pukCode: e.target.value }))} /></label></div>
       <div><label>Équipement<br /><input value={f.equipment} onChange={e => setF(p => ({ ...p, equipment: e.target.value }))} /></label></div>
       <div><label>N° Série équipement<br /><input value={f.equipmentSerialNumber} onChange={e => setF(p => ({ ...p, equipmentSerialNumber: e.target.value }))} /></label></div>
-      <div><label>Débit (Go)<br /><input type="number" value={f.bandwidth} placeholder="ex: 40, 70, 90" onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))} /></label></div>
+      <div><label>Débit<br /><select value={f.bandwidth} onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))}>
+        <option value="">-- sélectionner --</option>
+        {INTERNET_4G_BANDWIDTH_OPTIONS.map(bw => <option key={bw} value={bw}>{bw}</option>)}
+      </select></label></div>
       {err && <p style={{ color: 'red' }}>{err}</p>}
       <ErrorMsg error={error} />
       <div style={{ marginTop: 8 }}>
@@ -55,23 +54,22 @@ function CreateForm({ onSubmit, isPending, error, onCancel }: {
 function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
   initial: Internet4GLineResponse; onSubmit: (dto: Internet4GLineUpdateRequest) => void; isPending: boolean; error: unknown; onCancel: () => void
 }) {
-  const { agencies, plans, contracts } = useRefData()
+  const { agencies, contracts } = useRefData()
   const [f, setF] = useState({
     lineNumber: initial.lineNumber, lineStatus: initial.lineStatus,
     contractualAmount: String(initial.contractualAmount),
-    agencyId: initial.agencyId, planId: initial.planId,
+    agencyId: initial.agencyId,
     contractId: initial.contractId ?? '',
     serviceFunction: initial.serviceFunction, simSerialNumber: initial.simSerialNumber,
     pinCode: initial.pinCode, pukCode: initial.pukCode,
     equipment: initial.equipment, equipmentSerialNumber: initial.equipmentSerialNumber,
-    bandwidth: initial.bandwidth != null ? String(initial.bandwidth) : '0',
+    bandwidth: initial.bandwidth ?? '',
   })
   return (
     <form onSubmit={e => {
       e.preventDefault()
-      const bw = Number(f.bandwidth)
-      if (!bw || bw <= 0) { alert('Le débit doit être un nombre positif'); return }
-      onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), bandwidth: bw, contractId: f.contractId || undefined })
+      if (!f.bandwidth) { alert('Le débit est obligatoire'); return }
+      onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), bandwidth: f.bandwidth, contractId: f.contractId || undefined })
     }}>
       <div><label>Numéro de ligne<br /><input value={f.lineNumber} onChange={e => setF(p => ({ ...p, lineNumber: e.target.value }))} /></label></div>
       <div><label>État<br /><select value={f.lineStatus} onChange={e => setF(p => ({ ...p, lineStatus: e.target.value as LineStatus }))}>
@@ -80,9 +78,6 @@ function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
       <div><label>Montant contractuel<br /><input type="number" step="0.01" value={f.contractualAmount} onChange={e => setF(p => ({ ...p, contractualAmount: e.target.value }))} /></label></div>
       <div><label>Direction (Agence)<br /><select value={f.agencyId} onChange={e => setF(p => ({ ...p, agencyId: e.target.value }))}>
         {agencies.map((a: AgencyResponse) => <option key={a.id} value={a.id}>{a.name}</option>)}
-      </select></label></div>
-      <div><label>Forfait<br /><select value={f.planId} onChange={e => setF(p => ({ ...p, planId: e.target.value }))}>
-        {plans.map((pl: PlanResponse) => <option key={pl.id} value={pl.id}>{pl.name}</option>)}
       </select></label></div>
       <div><label>Contrat (optionnel)<br /><select value={f.contractId} onChange={e => setF(p => ({ ...p, contractId: e.target.value }))}>
         <option value="">Aucun</option>
@@ -94,7 +89,9 @@ function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
       <div><label>Code PUK<br /><input value={f.pukCode} onChange={e => setF(p => ({ ...p, pukCode: e.target.value }))} /></label></div>
       <div><label>Équipement<br /><input value={f.equipment} onChange={e => setF(p => ({ ...p, equipment: e.target.value }))} /></label></div>
       <div><label>N° Série équipement<br /><input value={f.equipmentSerialNumber} onChange={e => setF(p => ({ ...p, equipmentSerialNumber: e.target.value }))} /></label></div>
-      <div><label>Débit (Go)<br /><input type="number" value={f.bandwidth} onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))} /></label></div>
+      <div><label>Débit<br /><select value={f.bandwidth} onChange={e => setF(p => ({ ...p, bandwidth: e.target.value }))}>
+        {INTERNET_4G_BANDWIDTH_OPTIONS.map(bw => <option key={bw} value={bw}>{bw}</option>)}
+      </select></label></div>
       <ErrorMsg error={error} />
       <div style={{ marginTop: 8 }}>
         <button type="submit" disabled={isPending}>{isPending ? 'Enregistrement…' : 'Enregistrer'}</button>

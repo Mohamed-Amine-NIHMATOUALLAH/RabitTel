@@ -14,5 +14,5 @@ import lombok.experimental.SuperBuilder;
 public class FTTHLineResponseDTO extends LineResponseDTO {
     private String fixedLineNumber;
     private String routerBrand;
-    private Long bandwidth;
+    private String bandwidth;
 }

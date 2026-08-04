@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { vpn4GService } from '../../services'
-import type { VPN4GLineResponse, VPN4GLineCreateRequest, VPN4GLineUpdateRequest, AgencyResponse, PlanResponse, ContractResponse } from '../../types'
+import type { VPN4GLineResponse, VPN4GLineCreateRequest, VPN4GLineUpdateRequest, AgencyResponse, ContractResponse } from '../../types'
 import { LineStatus, LineType } from '../../types'
 import LinePage from './LinePage'
 import { useRefData } from './useRefData'
@@ -9,15 +9,15 @@ import ErrorMsg from '../../components/ErrorMsg'
 function CreateForm({ onSubmit, isPending, error, onCancel }: {
   onSubmit: (dto: VPN4GLineCreateRequest) => void; isPending: boolean; error: unknown; onCancel: () => void
 }) {
-  const { agencies, plans } = useRefData()
+  const { agencies } = useRefData()
   const [f, setF] = useState({
-    lineNumber: '', contractualAmount: '', agencyId: '', planId: '',
+    lineNumber: '', contractualAmount: '', agencyId: '',
     equipment: '', ipAddress: '', serialNumber: '', deliveryDate: ''
   })
   const [err, setErr] = useState('')
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!f.lineNumber || !f.contractualAmount || !f.agencyId || !f.planId || !f.equipment || !f.ipAddress || !f.serialNumber || !f.deliveryDate) {
+    if (!f.lineNumber || !f.contractualAmount || !f.agencyId || !f.equipment || !f.ipAddress || !f.serialNumber || !f.deliveryDate) {
       setErr('Tous les champs sont obligatoires'); return
     }
     onSubmit({ ...f, contractualAmount: Number(f.contractualAmount), lineType: LineType.G4_VPN, lineStatus: LineStatus.ACTIVE })
@@ -29,10 +29,6 @@ function CreateForm({ onSubmit, isPending, error, onCancel }: {
       <div><label>Direction (Agence)<br /><select value={f.agencyId} onChange={e => setF(p => ({ ...p, agencyId: e.target.value }))}>
         <option value="">-- sélectionner --</option>
         {agencies.map((a: AgencyResponse) => <option key={a.id} value={a.id}>{a.name}</option>)}
-      </select></label></div>
-      <div><label>Forfait<br /><select value={f.planId} onChange={e => setF(p => ({ ...p, planId: e.target.value }))}>
-        <option value="">-- sélectionner --</option>
-        {plans.map((pl: PlanResponse) => <option key={pl.id} value={pl.id}>{pl.name}</option>)}
       </select></label></div>
       <div><label>Équipement<br /><input value={f.equipment} onChange={e => setF(p => ({ ...p, equipment: e.target.value }))} /></label></div>
       <div><label>Adresse IP<br /><input value={f.ipAddress} placeholder="ex: 192.168.1.1" onChange={e => setF(p => ({ ...p, ipAddress: e.target.value }))} /></label></div>
@@ -51,11 +47,11 @@ function CreateForm({ onSubmit, isPending, error, onCancel }: {
 function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
   initial: VPN4GLineResponse; onSubmit: (dto: VPN4GLineUpdateRequest) => void; isPending: boolean; error: unknown; onCancel: () => void
 }) {
-  const { agencies, plans, contracts } = useRefData()
+  const { agencies, contracts } = useRefData()
   const [f, setF] = useState({
     lineNumber: initial.lineNumber, lineStatus: initial.lineStatus,
     contractualAmount: String(initial.contractualAmount),
-    agencyId: initial.agencyId, planId: initial.planId,
+    agencyId: initial.agencyId,
     contractId: initial.contractId ?? '',
     equipment: initial.equipment, ipAddress: initial.ipAddress,
     serialNumber: initial.serialNumber,
@@ -70,9 +66,6 @@ function UpdateForm({ initial, onSubmit, isPending, error, onCancel }: {
       <div><label>Montant contractuel<br /><input type="number" step="0.01" value={f.contractualAmount} onChange={e => setF(p => ({ ...p, contractualAmount: e.target.value }))} /></label></div>
       <div><label>Direction (Agence)<br /><select value={f.agencyId} onChange={e => setF(p => ({ ...p, agencyId: e.target.value }))}>
         {agencies.map((a: AgencyResponse) => <option key={a.id} value={a.id}>{a.name}</option>)}
-      </select></label></div>
-      <div><label>Forfait<br /><select value={f.planId} onChange={e => setF(p => ({ ...p, planId: e.target.value }))}>
-        {plans.map((pl: PlanResponse) => <option key={pl.id} value={pl.id}>{pl.name}</option>)}
       </select></label></div>
       <div><label>Contrat (optionnel)<br /><select value={f.contractId} onChange={e => setF(p => ({ ...p, contractId: e.target.value }))}>
         <option value="">Aucun</option>

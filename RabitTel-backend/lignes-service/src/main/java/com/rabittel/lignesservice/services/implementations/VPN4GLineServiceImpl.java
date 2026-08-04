@@ -4,7 +4,6 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPN4GLineRequestDT
 import com.rabittel.lignesservice.dtos.request.LineRequestDTO.VPN4GLineRequestDTO.VPN4GLineUpdateRequestDTO;
 import com.rabittel.lignesservice.dtos.response.VPN4GLineResponseDTO;
 import com.rabittel.lignesservice.entities.Agency;
-import com.rabittel.lignesservice.entities.Plan;
 import com.rabittel.lignesservice.entities.VPN4GLine;
 import com.rabittel.lignesservice.enums.LineStatus;
 import com.rabittel.lignesservice.enums.LineType;
@@ -15,6 +14,7 @@ import com.rabittel.lignesservice.repositories.VPN4GLineRepository;
 import com.rabittel.lignesservice.services.interfaces.VPN4GLineService;
 import com.rabittel.lignesservice.specifications.LineSpecification;
 import com.rabittel.lignesservice.specifications.VPN4GLineSpecification;
+import com.rabittel.lignesservice.validation.LineValueUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -29,10 +29,11 @@ public class VPN4GLineServiceImpl implements VPN4GLineService {
     private final VPN4GLineRepository vpn4GLineRepository;
     private final VPN4GLineMapper vpn4GLineMapper;
     private final com.rabittel.lignesservice.repositories.AgencyRepository agencyRepository;
-    private final com.rabittel.lignesservice.repositories.PlanRepository planRepository;
     private final com.rabittel.lignesservice.repositories.ContractRepository contractRepository;
 
     public VPN4GLineResponseDTO createVPN4GLine(VPN4GLineCreateRequestDTO createRequestDTO) {
+        createRequestDTO.setLineNumber(normalizeGsmLikeLineNumber(createRequestDTO.getLineNumber()));
+
         if (vpn4GLineRepository.existsByLineNumber(createRequestDTO.getLineNumber())) {
             throw new ResourceAlreadyExistsException("VPN 4G Line with number " + createRequestDTO.getLineNumber() + " already exists.");
         }
@@ -49,11 +50,8 @@ public class VPN4GLineServiceImpl implements VPN4GLineService {
 
         Agency agency = agencyRepository.findById(createRequestDTO.getAgencyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
-        Plan plan = planRepository.findById(createRequestDTO.getPlanId())
-                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
 
         vpn4GLine.setAgency(agency);
-        vpn4GLine.setPlan(plan);
 
         vpn4GLine.setLineType(LineType.G4_VPN);
         vpn4GLine.setLineStatus(LineStatus.ACTIVE);
@@ -70,6 +68,10 @@ public class VPN4GLineServiceImpl implements VPN4GLineService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "VPN 4G Line with id " + id + " not found."
                 ));
+
+        if (updateRequestDTO.getLineNumber() != null) {
+            updateRequestDTO.setLineNumber(normalizeGsmLikeLineNumber(updateRequestDTO.getLineNumber()));
+        }
 
         // Vérification de l'unicité du numéro de ligne
         if (updateRequestDTO.getLineNumber() != null
@@ -119,14 +121,6 @@ public class VPN4GLineServiceImpl implements VPN4GLineService {
             vpn4GLine.setAgency(agency);
         }
 
-        if (updateRequestDTO.getPlanId() != null) {
-            var plan = planRepository.findById(updateRequestDTO.getPlanId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Plan with id " + updateRequestDTO.getPlanId() + " not found."
-                    ));
-            vpn4GLine.setPlan(plan);
-        }
-
         if (updateRequestDTO.getContractId() != null) {
             var contract = contractRepository.findById(updateRequestDTO.getContractId())
                     .orElseThrow(() -> new ResourceNotFoundException(
@@ -170,7 +164,7 @@ public class VPN4GLineServiceImpl implements VPN4GLineService {
     }
 
     public VPN4GLineResponseDTO getVPN4GLineByLineNumber(String lineNumber) {
-        VPN4GLine vpn4GLine = vpn4GLineRepository.findByLineNumber(lineNumber)
+        VPN4GLine vpn4GLine = vpn4GLineRepository.findByLineNumber(normalizeGsmLikeLineNumber(lineNumber))
             .orElseThrow(() -> new ResourceNotFoundException("VPN 4G Line with number " + lineNumber + " not found."));
         return vpn4GLineMapper.toVPN4GLineResponseDTO(vpn4GLine);
     }
@@ -189,8 +183,9 @@ public class VPN4GLineServiceImpl implements VPN4GLineService {
     public List<VPN4GLineResponseDTO> searchVPN4GLines(String lineNumber, LineStatus lineStatus,
                                                        String equipment, String ipAddress, String serialNumber,
                                                        java.time.LocalDate deliveryDateFrom, java.time.LocalDate deliveryDateTo) {
-        Specification<VPN4GLine> spec = Specification
-                .<VPN4GLine>where(LineSpecification.hasLineNumber(lineNumber))
+        Specification<VPN4GLine> spec = LineSpecification.<VPN4GLine>hasLineNumber(
+                        lineNumber == null ? null : normalizeGsmLikeLineNumber(lineNumber)
+                )
                 .and(LineSpecification.hasLineStatus(lineStatus))
                 .and(VPN4GLineSpecification.hasEquipment(equipment))
                 .and(VPN4GLineSpecification.hasIpAddress(ipAddress))
@@ -214,5 +209,9 @@ public class VPN4GLineServiceImpl implements VPN4GLineService {
             vpn4GLine.setLineStatus(LineStatus.TERMINATED);
             vpn4GLineRepository.save(vpn4GLine);
         }
+    }
+
+    private String normalizeGsmLikeLineNumber(String lineNumber) {
+        return LineValueUtils.normalizeMoroccanPhoneNumber(lineNumber, '6');
     }
 }

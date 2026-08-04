@@ -27,9 +27,6 @@ public abstract class LineResponseDTO {
     private UUID agencyId;
     private String agencyName;
 
-    private UUID planId;
-    private String planName;
-
     private UUID contractId;
     private LocalDate contractEndDate;
 

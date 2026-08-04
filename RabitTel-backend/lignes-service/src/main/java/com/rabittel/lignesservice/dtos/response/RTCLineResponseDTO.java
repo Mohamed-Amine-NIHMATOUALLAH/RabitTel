@@ -10,4 +10,5 @@ import lombok.experimental.SuperBuilder;
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
-public class RTCLineResponseDTO extends LineResponseDTO { }
+public class RTCLineResponseDTO extends LineResponseDTO {
+}

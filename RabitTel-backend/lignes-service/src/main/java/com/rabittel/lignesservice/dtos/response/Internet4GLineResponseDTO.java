@@ -18,5 +18,5 @@ public class Internet4GLineResponseDTO extends LineResponseDTO {
     private String pukCode;
     private String equipment;
     private String equipmentSerialNumber;
-    private Long bandwidth;
+    private String bandwidth;
 }

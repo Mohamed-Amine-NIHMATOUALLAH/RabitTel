@@ -5,7 +5,6 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.FTTHLineRequestDTO
 import com.rabittel.lignesservice.dtos.response.FTTHLineResponseDTO;
 import com.rabittel.lignesservice.entities.Agency;
 import com.rabittel.lignesservice.entities.FTTHLine;
-import com.rabittel.lignesservice.entities.Plan;
 import com.rabittel.lignesservice.enums.LineStatus;
 import com.rabittel.lignesservice.enums.LineType;
 import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
@@ -15,6 +14,7 @@ import com.rabittel.lignesservice.repositories.FTTHLineRepository;
 import com.rabittel.lignesservice.services.interfaces.FTTHLineService;
 import com.rabittel.lignesservice.specifications.FTTHLineSpecification;
 import com.rabittel.lignesservice.specifications.LineSpecification;
+import com.rabittel.lignesservice.validation.LineValueUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -29,10 +29,14 @@ public class FTTHLineServiceImpl implements FTTHLineService {
     private final FTTHLineRepository ftthLineRepository;
     private final FTTHLineMapper ftthLineMapper;
     private final com.rabittel.lignesservice.repositories.AgencyRepository agencyRepository;
-    private final com.rabittel.lignesservice.repositories.PlanRepository planRepository;
     private final com.rabittel.lignesservice.repositories.ContractRepository contractRepository;
 
     public FTTHLineResponseDTO createFTTHLine(FTTHLineCreateRequestDTO createRequestDTO) {
+        String normalizedLineNumber = normalizeFixedLineNumber(createRequestDTO.getLineNumber());
+        String normalizedFixedLineNumber = normalizeFixedLineNumber(createRequestDTO.getFixedLineNumber());
+        createRequestDTO.setLineNumber(normalizedLineNumber);
+        createRequestDTO.setFixedLineNumber(normalizedFixedLineNumber);
+
         if (ftthLineRepository.existsByLineNumber(createRequestDTO.getLineNumber())) {
             throw new ResourceAlreadyExistsException("FTTH Line with number " + createRequestDTO.getLineNumber() + " already exists.");
         }
@@ -45,11 +49,8 @@ public class FTTHLineServiceImpl implements FTTHLineService {
 
         Agency agency = agencyRepository.findById(createRequestDTO.getAgencyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
-        Plan plan = planRepository.findById(createRequestDTO.getPlanId())
-                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
 
         ftthLine.setAgency(agency);
-        ftthLine.setPlan(plan);
         ftthLine.setLineType(LineType.FTTH);
         ftthLine.setLineStatus(LineStatus.ACTIVE);
 
@@ -66,6 +67,12 @@ public class FTTHLineServiceImpl implements FTTHLineService {
                         new ResourceNotFoundException("FTTH Line not found")
                 );
 
+        if (dto.getLineNumber() != null) {
+            dto.setLineNumber(normalizeFixedLineNumber(dto.getLineNumber()));
+        }
+        if (dto.getFixedLineNumber() != null) {
+            dto.setFixedLineNumber(normalizeFixedLineNumber(dto.getFixedLineNumber()));
+        }
 
         if(dto.getLineNumber()!=null
                 && !dto.getLineNumber().equals(ftthLine.getLineNumber())
@@ -86,9 +93,18 @@ public class FTTHLineServiceImpl implements FTTHLineService {
             );
         }
 
-
         ftthLineMapper.updateEntityFromDto(dto, ftthLine);
 
+        if (dto.getAgencyId() != null) {
+            Agency agency = agencyRepository.findById(dto.getAgencyId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
+            ftthLine.setAgency(agency);
+        }
+        if (dto.getContractId() != null) {
+            var contract = contractRepository.findById(dto.getContractId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Contract not found"));
+            ftthLine.setContract(contract);
+        }
 
         return ftthLineMapper.toFTTHLineResponseDTO(
                 ftthLineRepository.save(ftthLine)
@@ -128,7 +144,8 @@ public class FTTHLineServiceImpl implements FTTHLineService {
     }
 
     public FTTHLineResponseDTO getFTTHLineByLineNumber(String lineNumber) {
-        FTTHLine ftthLine = ftthLineRepository.findByLineNumber(lineNumber)
+        String normalized = normalizeFixedLineNumber(lineNumber);
+        FTTHLine ftthLine = ftthLineRepository.findByLineNumber(normalized)
             .orElseThrow(() -> new ResourceNotFoundException("FTTH Line with number " + lineNumber + " not found."));
         return ftthLineMapper.toFTTHLineResponseDTO(ftthLine);
     }
@@ -152,16 +169,21 @@ public class FTTHLineServiceImpl implements FTTHLineService {
     }
 
     public List<FTTHLineResponseDTO> searchFTTHLines(String lineNumber, LineStatus lineStatus,
-                                                     String fixedLineNumber, String routerBrand, Long bandwidth) {
-        Specification<FTTHLine> spec = Specification
-                .<FTTHLine>where(LineSpecification.hasLineNumber(lineNumber))
+                                                     String fixedLineNumber, String routerBrand, String bandwidth) {
+        String normalizedLineNumber = lineNumber == null ? null : normalizeFixedLineNumber(lineNumber);
+        String normalizedFixedLineNumber = fixedLineNumber == null ? null : normalizeFixedLineNumber(fixedLineNumber);
+        Specification<FTTHLine> spec = LineSpecification.<FTTHLine>hasLineNumber(normalizedLineNumber)
                 .and(LineSpecification.hasLineStatus(lineStatus))
-                .and(FTTHLineSpecification.hasFixedLineNumber(fixedLineNumber))
+                .and(FTTHLineSpecification.hasFixedLineNumber(normalizedFixedLineNumber))
                 .and(FTTHLineSpecification.hasRouterBrand(routerBrand))
                 .and(FTTHLineSpecification.hasBandwidth(bandwidth));
 
         return ftthLineRepository.findAll(spec).stream()
                 .map(ftthLineMapper::toFTTHLineResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    private String normalizeFixedLineNumber(String value) {
+        return LineValueUtils.normalizeMoroccanPhoneNumber(value, '5');
     }
 }

@@ -11,7 +11,7 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VPNLineResponseDTO extends LineResponseDTO {
-    private Long bandwidth;
+public class DataLineResponseDTO extends LineResponseDTO {
+    private String bandwidth;
     private String ipAddress;
 }

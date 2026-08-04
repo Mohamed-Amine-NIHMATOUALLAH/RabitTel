@@ -8,6 +8,7 @@ import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
 import com.rabittel.lignesservice.exceptions.ResourceNotFoundException;
 import com.rabittel.lignesservice.mappers.AgencyMapper;
 import com.rabittel.lignesservice.repositories.AgencyRepository;
+import com.rabittel.lignesservice.repositories.LineRepository;
 import com.rabittel.lignesservice.services.interfaces.AgencyService;
 import com.rabittel.lignesservice.specifications.AgencySpecification;
 import jakarta.transaction.Transactional;
@@ -26,6 +27,13 @@ public class
 AgencyServiceImpl implements AgencyService {
     private final AgencyRepository agencyRepository;
     private final AgencyMapper agencyMapper;
+    private final LineRepository lineRepository;
+
+    private AgencyResponseDTO mapToResponse(Agency agency) {
+        AgencyResponseDTO dto = agencyMapper.toAgencyResponseDTO(agency);
+        dto.setLinesCount(lineRepository.countByAgencyId(agency.getId()));
+        return dto;
+    }
 
     @Transactional
     public AgencyResponseDTO createAgency(AgencyCreateRequestDTO dto) {
@@ -44,7 +52,7 @@ AgencyServiceImpl implements AgencyService {
 
         Agency savedAgency = agencyRepository.save(agency);
 
-        return agencyMapper.toAgencyResponseDTO(savedAgency);
+        return mapToResponse(savedAgency);
     }
 
     @Transactional
@@ -75,7 +83,7 @@ AgencyServiceImpl implements AgencyService {
 
         Agency updatedAgency = agencyRepository.save(agency);
 
-        return agencyMapper.toAgencyResponseDTO(updatedAgency);
+        return mapToResponse(updatedAgency);
     }
 
     @Transactional
@@ -85,7 +93,7 @@ AgencyServiceImpl implements AgencyService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Agency not found with id: " + id));
 
-        if (!agency.getLines().isEmpty()) {
+        if (lineRepository.countByAgencyId(id) > 0) {
             throw new IllegalStateException(
                     "Cannot deactivate agency because it still has assigned lines.");
         }
@@ -104,7 +112,7 @@ AgencyServiceImpl implements AgencyService {
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Agency not found with id: " + id));
 
-        if (!agency.getLines().isEmpty()) {
+        if (lineRepository.countByAgencyId(id) > 0) {
             throw new IllegalStateException(
                     "Cannot delete agency because it still has assigned lines.");
         }
@@ -120,7 +128,7 @@ AgencyServiceImpl implements AgencyService {
     @Transactional
     public List<AgencyResponseDTO> getAllAgencies() {
         return agencyRepository.findAll().stream()
-                .map(agencyMapper::toAgencyResponseDTO)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
@@ -128,47 +136,46 @@ AgencyServiceImpl implements AgencyService {
     public AgencyResponseDTO getAgencyById(UUID id) {
         Agency agency = agencyRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Agency with id " + id + " not found."));
-        return agencyMapper.toAgencyResponseDTO(agency);
+        return mapToResponse(agency);
     }
 
     @Transactional
     public List<AgencyResponseDTO> getAgenciesByActiveStatus(Boolean active) {
         return agencyRepository.findByActive(active).stream()
-                .map(agencyMapper::toAgencyResponseDTO)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public List<AgencyResponseDTO> getAgenciesByDirectorateCode(String directorateCode) {
         return agencyRepository.findByDirectorateCode(directorateCode).stream()
-                .map(agencyMapper::toAgencyResponseDTO)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public List<AgencyResponseDTO> getAgenciesByName(String name) {
         return agencyRepository.findByNameContainingIgnoreCase(name).stream()
-                .map(agencyMapper::toAgencyResponseDTO)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public List<AgencyResponseDTO> getAgenciesByRegion(String region) {
         return agencyRepository.findByRegion(region).stream()
-                .map(agencyMapper::toAgencyResponseDTO)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public List<AgencyResponseDTO> searchAgencies(Boolean active, String region, String directorateCode, String name) {
-        Specification<Agency> spec = Specification
-                .<Agency>where(AgencySpecification.hasActive(active))
+        Specification<Agency> spec = AgencySpecification.hasActive(active)
                 .and(AgencySpecification.hasRegion(region))
                 .and(AgencySpecification.hasDirectorateCode(directorateCode))
                 .and(AgencySpecification.nameContains(name));
 
         return agencyRepository.findAll(spec).stream()
-                .map(agencyMapper::toAgencyResponseDTO)
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 }

@@ -5,7 +5,6 @@ import com.rabittel.lignesservice.dtos.request.LineRequestDTO.Internet4GLineRequ
 import com.rabittel.lignesservice.dtos.response.Internet4GLineResponseDTO;
 import com.rabittel.lignesservice.entities.Agency;
 import com.rabittel.lignesservice.entities.Internet4GLine;
-import com.rabittel.lignesservice.entities.Plan;
 import com.rabittel.lignesservice.enums.LineStatus;
 import com.rabittel.lignesservice.enums.LineType;
 import com.rabittel.lignesservice.exceptions.ResourceAlreadyExistsException;
@@ -14,10 +13,10 @@ import com.rabittel.lignesservice.mappers.Internet4GLineMapper;
 import com.rabittel.lignesservice.repositories.AgencyRepository;
 import com.rabittel.lignesservice.repositories.ContractRepository;
 import com.rabittel.lignesservice.repositories.Internet4GLineRepository;
-import com.rabittel.lignesservice.repositories.PlanRepository;
 import com.rabittel.lignesservice.services.interfaces.Internet4GLineService;
 import com.rabittel.lignesservice.specifications.Internet4GLineSpecification;
 import com.rabittel.lignesservice.specifications.LineSpecification;
+import com.rabittel.lignesservice.validation.LineValueUtils;
 import lombok.AllArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -34,12 +33,11 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
     private final Internet4GLineMapper internet4GLineMapper;
 
     private final AgencyRepository agencyRepository;
-    private final PlanRepository planRepository;
     private final ContractRepository contractRepository;
-
 
     public Internet4GLineResponseDTO createInternet4GLine(
             Internet4GLineCreateRequestDTO createRequestDTO) {
+        createRequestDTO.setLineNumber(normalizeGsmLikeLineNumber(createRequestDTO.getLineNumber()));
 
         if (internet4GLineRepository.existsByLineNumber(createRequestDTO.getLineNumber())) {
             throw new ResourceAlreadyExistsException(
@@ -71,11 +69,8 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
 
         Agency agency = agencyRepository.findById(createRequestDTO.getAgencyId())
                 .orElseThrow(() -> new ResourceNotFoundException("Agency not found"));
-        Plan plan = planRepository.findById(createRequestDTO.getPlanId())
-                .orElseThrow(() -> new ResourceNotFoundException("Plan not found"));
 
         internet4GLine.setAgency(agency);
-        internet4GLine.setPlan(plan);
 
         internet4GLine.setLineType(LineType.G4);
         internet4GLine.setLineStatus(LineStatus.ACTIVE);
@@ -103,7 +98,9 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
                                                 + " not found."
                                 ));
 
-
+        if (updateRequestDTO.getLineNumber() != null) {
+            updateRequestDTO.setLineNumber(normalizeGsmLikeLineNumber(updateRequestDTO.getLineNumber()));
+        }
 
         if (updateRequestDTO.getLineNumber() != null
                 && !updateRequestDTO.getLineNumber()
@@ -172,21 +169,6 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
 
 
 
-        if (updateRequestDTO.getPlanId() != null) {
-
-            var plan = planRepository.findById(
-                            updateRequestDTO.getPlanId()
-                    )
-                    .orElseThrow(() ->
-                            new ResourceNotFoundException(
-                                    "Plan not found."
-                            ));
-
-            internet4GLine.setPlan(plan);
-        }
-
-
-
         if (updateRequestDTO.getContractId() != null) {
 
             var contract = contractRepository.findById(
@@ -199,7 +181,6 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
 
             internet4GLine.setContract(contract);
         }
-
 
 
 
@@ -270,6 +251,7 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
 
 
 
+
     public List<Internet4GLineResponseDTO> getAllInternet4GLines() {
 
         return internet4GLineRepository.findAll()
@@ -300,9 +282,11 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
     public Internet4GLineResponseDTO getInternet4GLineByLineNumber(
             String lineNumber) {
 
+        String normalizedLineNumber = normalizeGsmLikeLineNumber(lineNumber);
+
 
         Internet4GLine internet4GLine =
-                internet4GLineRepository.findByLineNumber(lineNumber)
+                internet4GLineRepository.findByLineNumber(normalizedLineNumber)
                         .orElseThrow(() ->
                                 new ResourceNotFoundException(
                                         "4G Line not found."
@@ -312,6 +296,7 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
         return internet4GLineMapper
                 .toInternet4GLineResponseDTO(internet4GLine);
     }
+
 
 
 
@@ -326,6 +311,7 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
                 .map(internet4GLineMapper::toInternet4GLineResponseDTO)
                 .collect(Collectors.toList());
     }
+
 
 
 
@@ -346,6 +332,7 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
 
 
 
+
     public List<Internet4GLineResponseDTO> searchInternet4GLines(
             String lineNumber,
             LineStatus lineStatus,
@@ -355,44 +342,29 @@ public class Internet4GLineServiceImpl implements Internet4GLineService {
             String pukCode,
             String equipment,
             String equipmentSerialNumber,
-            Long bandwidth) {
+            String bandwidth) {
 
-
+        String normalizedLineNumber = lineNumber == null ? null : normalizeGsmLikeLineNumber(lineNumber);
         Specification<Internet4GLine> spec =
-                Specification
-                        .<Internet4GLine>where(
-                                LineSpecification.hasLineNumber(lineNumber)
-                        )
-                        .and(
-                                LineSpecification.hasLineStatus(lineStatus)
-                        )
-                        .and(
-                                Internet4GLineSpecification.hasServiceFunction(serviceFunction)
-                        )
-                        .and(
-                                Internet4GLineSpecification.hasSimSerialNumber(simSerialNumber)
-                        )
-                        .and(
-                                Internet4GLineSpecification.hasPinCode(pinCode)
-                        )
-                        .and(
-                                Internet4GLineSpecification.hasPukCode(pukCode)
-                        )
-                        .and(
-                                Internet4GLineSpecification.hasEquipment(equipment)
-                        )
-                        .and(
-                                Internet4GLineSpecification.hasEquipmentSerialNumber(equipmentSerialNumber)
-                        )
-                        .and(
-                                Internet4GLineSpecification.hasBandwidth(bandwidth)
-                        );
+                LineSpecification.<Internet4GLine>hasLineNumber(normalizedLineNumber)
+                        .and(LineSpecification.hasLineStatus(lineStatus))
+                        .and(Internet4GLineSpecification.hasServiceFunction(serviceFunction))
+                        .and(Internet4GLineSpecification.hasSimSerialNumber(simSerialNumber))
+                        .and(Internet4GLineSpecification.hasPinCode(pinCode))
+                        .and(Internet4GLineSpecification.hasPukCode(pukCode))
+                        .and(Internet4GLineSpecification.hasEquipment(equipment))
+                        .and(Internet4GLineSpecification.hasEquipmentSerialNumber(equipmentSerialNumber))
+                        .and(Internet4GLineSpecification.hasBandwidth(bandwidth));
 
 
         return internet4GLineRepository.findAll(spec)
                 .stream()
                 .map(internet4GLineMapper::toInternet4GLineResponseDTO)
                 .collect(Collectors.toList());
+    }
+
+    private String normalizeGsmLikeLineNumber(String lineNumber) {
+        return LineValueUtils.normalizeMoroccanPhoneNumber(lineNumber, '6');
     }
 
 }

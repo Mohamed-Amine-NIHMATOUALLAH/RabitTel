@@ -6,7 +6,7 @@ import type {
   ContractResponse, ContractCreateRequest, ContractRenewalRequest,
   FTTHLineResponse, FTTHLineCreateRequest, FTTHLineUpdateRequest,
   RTCLineResponse, RTCLineCreateRequest, RTCLineUpdateRequest,
-  VPNLineResponse, VPNLineCreateRequest, VPNLineUpdateRequest,
+  DataLineResponse, DataLineCreateRequest, DataLineUpdateRequest,
   GSMLineResponse, GSMLineCreateRequest, GSMLineUpdateRequest,
   Internet4GLineResponse, Internet4GLineCreateRequest, Internet4GLineUpdateRequest,
   VPN4GLineResponse, VPN4GLineCreateRequest, VPN4GLineUpdateRequest,
@@ -15,7 +15,7 @@ import type {
   UserUpdateRequest, ChangePasswordRequest, ForgotPasswordRequest,
   Page,
 } from '../types'
-import { ContractStatus, LineStatus } from '../types'
+import { ContractStatus, LineStatus, LineType } from '../types'
 
 const d = <T>(r: AxiosResponse<T>) => r.data
 
@@ -151,24 +151,28 @@ export const rtcService = {
     api.delete(`/lines/rtc/${id}`).then(() => undefined as void),
 }
 
-// ─── VPN ADSL Lines ──────────────────────────────────────────────────────────
-export const vpnService = {
-  getAll: (p?: { lineNumber?: string; lineStatus?: LineStatus; bandwidth?: string; ipAddress?: string }) =>
-    api.get<VPNLineResponse[]>('/lines/vpn-adsl', { params: p }).then(d),
+// ─── Data Lines ──────────────────────────────────────────────────────────
+export const dataLineService = {
+  getAll: (p?: { lineNumber?: string; lineStatus?: LineStatus; lineType?: LineType; bandwidth?: string; ipAddress?: string }) =>
+    api.get<DataLineResponse[]>('/lines/data', { params: p }).then(d),
   getById: (id: string) =>
-    api.get<VPNLineResponse>(`/lines/vpn-adsl/${id}`).then(d),
+    api.get<DataLineResponse>(`/lines/data/${id}`).then(d),
   getByLineNumber: (n: string) =>
-    api.get<VPNLineResponse>(`/lines/vpn-adsl/number/${n}`).then(d),
-  getBillable: () =>
-    api.get<VPNLineResponse[]>('/lines/vpn-adsl/billable').then(d),
-  create: (dto: VPNLineCreateRequest) =>
-    api.post<VPNLineResponse>('/lines/vpn-adsl', dto).then(d),
-  update: (id: string, dto: VPNLineUpdateRequest) =>
-    api.put<VPNLineResponse>(`/lines/vpn-adsl/${id}`, dto).then(d),
+    api.get<DataLineResponse>(`/lines/data/number/${n}`).then(d),
+  getBillable: (lineType?: LineType) =>
+    api.get<DataLineResponse[]>('/lines/data/billable', { params: { lineType } }).then(d),
+  create: (dto: DataLineCreateRequest) =>
+    api.post<DataLineResponse>('/lines/data', dto).then(d),
+  update: (id: string, dto: DataLineUpdateRequest) =>
+    api.put<DataLineResponse>(`/lines/data/${id}`, dto).then(d),
   terminate: (id: string) =>
-    api.patch(`/lines/vpn-adsl/${id}/terminate`).then(() => undefined as void),
+    api.patch(`/lines/data/${id}/terminate`).then(() => undefined as void),
   delete: (id: string) =>
-    api.delete(`/lines/vpn-adsl/${id}`).then(() => undefined as void),
+    api.delete(`/lines/data/${id}`).then(() => undefined as void),
+  getAllByType: (lineType: LineType) =>
+    api.get<DataLineResponse[]>('/lines/data', { params: { lineType } }).then(d),
+  getBillableByType: (lineType: LineType) =>
+    api.get<DataLineResponse[]>('/lines/data/billable', { params: { lineType } }).then(d),
 }
 
 // ─── GSM Pro Lines ────────────────────────────────────────────────────────────

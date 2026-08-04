@@ -19,4 +19,5 @@ public interface GSMLineRepository extends JpaRepository<GSMLine, UUID>, JpaSpec
 
     List<GSMLine> findByLineStatus(LineStatus lineStatus);
     List<GSMLine> findByLineStatusIn(List<LineStatus> statuses);
+    long countByPlanId(UUID planId);
 }

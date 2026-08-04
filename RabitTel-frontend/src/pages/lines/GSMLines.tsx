@@ -105,6 +105,7 @@ export default function GSMLines() {
       terminateFn={gsmService.terminate}
       deleteFn={gsmService.delete}
       extraColumns={[
+        { header: 'Forfait', cell: (r: GSMLineResponse) => r.planName },
         { header: 'Affectation / Fonction', cell: (r: GSMLineResponse) => r.serviceFunction },
         { header: 'N° Série puce', cell: (r: GSMLineResponse) => r.chipSerialNumber },
         { header: 'Date livraison puce', cell: (r: GSMLineResponse) => r.chipDeliveryDate?.slice(0, 10) },

@@ -59,7 +59,7 @@ public class FTTHLineController {
             @RequestParam(required = false) LineStatus lineStatus,
             @RequestParam(required = false) String fixedLineNumber,
             @RequestParam(required = false) String routerBrand,
-            @RequestParam(required = false) Long bandwidth
+            @RequestParam(required = false) String bandwidth
     ) {
         if (lineNumber == null && lineStatus == null && fixedLineNumber == null
                 && routerBrand == null && bandwidth == null) {

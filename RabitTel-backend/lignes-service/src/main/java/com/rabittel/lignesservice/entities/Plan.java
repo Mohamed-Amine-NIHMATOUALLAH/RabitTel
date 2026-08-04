@@ -48,5 +48,5 @@ public class Plan {
     private LocalDateTime creationDate;
 
     @OneToMany(mappedBy = "plan", fetch = FetchType.LAZY)
-    private List<Line> lines;
+    private List<GSMLine> lines;
 }

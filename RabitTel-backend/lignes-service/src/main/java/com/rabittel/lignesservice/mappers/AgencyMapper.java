@@ -5,15 +5,14 @@ import com.rabittel.lignesservice.dtos.request.AgencyRequestDTO.AgencyUpdateRequ
 import com.rabittel.lignesservice.dtos.response.AgencyResponseDTO;
 import com.rabittel.lignesservice.entities.Agency;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.ReportingPolicy;
 
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AgencyMapper {
 
-    // Entity -> Response DTO
-    @Mapping(target = "linesCount", expression = "java(agency.getLines() == null ? 0L : (long) agency.getLines().size())")
+    // Entity -> Response DTO (linesCount must be set by the service)
     AgencyResponseDTO toAgencyResponseDTO(Agency agency);
 
     // Create DTO -> Entity

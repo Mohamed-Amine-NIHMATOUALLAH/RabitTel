@@ -13,4 +13,5 @@ import lombok.experimental.SuperBuilder;
 @Setter
 @SuperBuilder
 @NoArgsConstructor
-public class RTCLine extends Line { }
+public class RTCLine extends Line {
+}
