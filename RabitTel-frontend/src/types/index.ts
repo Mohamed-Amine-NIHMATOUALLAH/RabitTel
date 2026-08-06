@@ -273,6 +273,7 @@ export interface UserResponse {
   phoneNumber: string;
   role: UserRole;
   isActive: boolean;
+  firstLogin: boolean;
   createdAt: string;
   lastLoginAt: string | null;
 }
@@ -317,6 +318,40 @@ export interface ChangePasswordRequest {
 
 export interface ForgotPasswordRequest {
   email: string;
+}
+
+// ─── Notifications ───────────────────────────────────────────────────────────
+export type NotificationChannel = 'EMAIL' | 'IN_APP' | 'SMS' | 'WHATSAPP' | 'MICROSOFT_TEAMS';
+export type NotificationStatus  = 'PENDING' | 'SENT' | 'FAILED' | 'RETRYING' | 'CANCELLED';
+export type NotificationType =
+  | 'CREATE_USER' | 'RESET_PASSWORD' | 'CHANGE_PASSWORD'
+  | 'ACCOUNT_LOCKED' | 'ACCOUNT_UNLOCKED' | 'ACCOUNT_ACTIVATED' | 'ACCOUNT_DEACTIVATED'
+  | 'LINE_CREATED' | 'LINE_UPDATED' | 'LINE_DELETED' | 'LINE_ASSIGNED' | 'LINE_UNASSIGNED'
+  | 'CONTRACT_CREATED' | 'CONTRACT_UPDATED' | 'CONTRACT_EXPIRED' | 'CONTRACT_EXPIRING'
+  | 'IMPORT_STARTED' | 'IMPORT_COMPLETED' | 'IMPORT_FAILED'
+  | 'SYSTEM_NOTIFICATION';
+
+export interface NotificationDeliveryResponse {
+  id: string;
+  channel: NotificationChannel;
+  recipient: string;
+  subject: string | null;
+  body: string | null;
+  status: NotificationStatus;
+  read: boolean;
+  readAt: string | null;
+  sentAt: string | null;
+  errorMessage: string | null;
+}
+
+export interface NotificationResponse {
+  id: string;
+  type: NotificationType;
+  resourceType: string;
+  resourceId: string;
+  createdAt: string;
+  deliveryCount: number;
+  deliveries: NotificationDeliveryResponse[];
 }
 
 export interface Page<T> {

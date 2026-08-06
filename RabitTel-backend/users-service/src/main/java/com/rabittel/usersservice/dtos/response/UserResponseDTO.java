@@ -21,6 +21,7 @@ public class UserResponseDTO {
     private String phoneNumber;
     private UserRole role;
     private boolean isActive;
+    private boolean firstLogin;
     private LocalDateTime createdAt;
     private LocalDateTime lastLoginAt;
 }

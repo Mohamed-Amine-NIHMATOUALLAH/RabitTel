@@ -4,19 +4,20 @@ import { agencyService } from '../services'
 import type { AgencyResponse, AgencyCreateRequest, AgencyUpdateRequest } from '../types'
 import ErrorMsg from '../components/ErrorMsg'
 import ConfirmDialog from '../components/ConfirmDialog'
-
-type AnyEvent = React.FormEvent<HTMLFormElement>
+import { useAuth, isAdmin } from '../auth/AuthContext'
 
 type Mode = 'list' | 'create' | 'edit'
 
 export default function Agencies() {
   const qc = useQueryClient()
+  const { user } = useAuth()
+  const admin = isAdmin(user)
+
   const [mode, setMode] = useState<Mode>('list')
   const [selected, setSelected] = useState<AgencyResponse | null>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
   const [confirmAction, setConfirmAction] = useState<'deactivate' | 'delete' | null>(null)
 
-  // list
   const [filterName, setFilterName] = useState('')
   const [filterRegion, setFilterRegion] = useState('')
   const [filterCode, setFilterCode] = useState('')
@@ -51,7 +52,6 @@ export default function Agencies() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['agencies'] }),
   })
 
-  // form state
   const [form, setForm] = useState({ name: '', directorateCode: '', region: '', active: true })
   const [formErr, setFormErr] = useState('')
 
@@ -81,7 +81,8 @@ export default function Agencies() {
     }
   }
 
-  if (mode !== 'list') {
+  // Create / Edit form — ADMIN only
+  if (admin && mode !== 'list') {
     return (
       <div>
         <h1>{mode === 'create' ? 'Create Agency' : 'Edit Agency'}</h1>
@@ -135,7 +136,7 @@ export default function Agencies() {
           <option value="true">Active</option>
           <option value="false">Inactive</option>
         </select>
-        <button onClick={openCreate}>+ New Agency</button>
+        {admin && <button onClick={openCreate}>+ New Agency</button>}
       </div>
 
       {isLoading && <p>Loading…</p>}
@@ -146,7 +147,8 @@ export default function Agencies() {
       <table border={1} cellPadding={6} style={{ borderCollapse: 'collapse', width: '100%' }}>
         <thead>
           <tr>
-            <th>Name</th><th>Code</th><th>Region</th><th>Active</th><th>Lines</th><th>Created</th><th>Actions</th>
+            <th>Name</th><th>Code</th><th>Region</th><th>Active</th><th>Lines</th><th>Created</th>
+            {admin && <th>Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -158,24 +160,26 @@ export default function Agencies() {
               <td>{a.active ? 'Yes' : 'No'}</td>
               <td>{a.linesCount}</td>
               <td>{a.creationDate?.slice(0, 10)}</td>
-              <td>
-                <button onClick={() => openEdit(a)}>Edit</button>
-                {' '}
-                {a.active && (
-                  <button onClick={() => { setConfirmId(a.id); setConfirmAction('deactivate') }}>Deactivate</button>
-                )}
-                {' '}
-                {!a.active && (
-                  <button onClick={() => { setConfirmId(a.id); setConfirmAction('delete') }}>Delete</button>
-                )}
-              </td>
+              {admin && (
+                <td>
+                  <button onClick={() => openEdit(a)}>Edit</button>
+                  {' '}
+                  {a.active && (
+                    <button onClick={() => { setConfirmId(a.id); setConfirmAction('deactivate') }}>Deactivate</button>
+                  )}
+                  {' '}
+                  {!a.active && (
+                    <button onClick={() => { setConfirmId(a.id); setConfirmAction('delete') }}>Delete</button>
+                  )}
+                </td>
+              )}
             </tr>
           ))}
-          {data?.length === 0 && <tr><td colSpan={7}>No agencies found</td></tr>}
+          {data?.length === 0 && <tr><td colSpan={admin ? 7 : 6}>No agencies found</td></tr>}
         </tbody>
       </table>
 
-      {confirmId && confirmAction && (
+      {admin && confirmId && confirmAction && (
         <ConfirmDialog
           message={`Confirm ${confirmAction} this agency?`}
           onConfirm={() => {

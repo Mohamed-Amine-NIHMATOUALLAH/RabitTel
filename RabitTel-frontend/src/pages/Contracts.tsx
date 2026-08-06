@@ -5,11 +5,15 @@ import type { ContractResponse, ContractCreateRequest, ContractRenewalRequest } 
 import { ContractStatus } from '../types'
 import ErrorMsg from '../components/ErrorMsg'
 import ConfirmDialog from '../components/ConfirmDialog'
+import { useAuth, isAdmin } from '../auth/AuthContext'
 
 type Mode = 'list' | 'create' | 'renew'
 
 export default function Contracts() {
   const qc = useQueryClient()
+  const { user } = useAuth()
+  const admin = isAdmin(user)
+
   const [mode, setMode] = useState<Mode>('list')
   const [selected, setSelected] = useState<ContractResponse | null>(null)
   const [confirmId, setConfirmId] = useState<string | null>(null)
@@ -68,7 +72,8 @@ export default function Contracts() {
     setMode('renew')
   }
 
-  if (mode === 'create') {
+  // Create — ADMIN only
+  if (admin && mode === 'create') {
     return (
       <div>
         <h1>Create Contract</h1>
@@ -90,7 +95,8 @@ export default function Contracts() {
     )
   }
 
-  if (mode === 'renew' && selected) {
+  // Renew — ADMIN only
+  if (admin && mode === 'renew' && selected) {
     return (
       <div>
         <h1>Renew Contract</h1>
@@ -120,7 +126,8 @@ export default function Contracts() {
         <button onClick={() => setTab('active')}>{tab === 'active' ? '[Active]' : 'Active'}</button>{' '}
         <button onClick={() => setTab('expired')}>{tab === 'expired' ? '[Expired]' : 'Expired'}</button>{' '}
         <button onClick={() => setTab('expiring')}>{tab === 'expiring' ? '[Expiring]' : 'Expiring'}</button>{' '}
-        <button onClick={openCreate}>+ New Contract</button>
+        {/* Create — ADMIN only */}
+        {admin && <button onClick={openCreate}>+ New Contract</button>}
       </div>
 
       {tab === 'all' && (
@@ -148,7 +155,10 @@ export default function Contracts() {
 
       <table border={1} cellPadding={6} style={{ borderCollapse: 'collapse', width: '100%' }}>
         <thead>
-          <tr><th>ID</th><th>Start</th><th>End</th><th>Duration</th><th>Status</th><th>Lines</th><th>Actions</th></tr>
+          <tr>
+            <th>ID</th><th>Start</th><th>End</th><th>Duration</th><th>Status</th><th>Lines</th>
+            {admin && <th>Actions</th>}
+          </tr>
         </thead>
         <tbody>
           {currentData?.map((c: ContractResponse) => (
@@ -159,18 +169,20 @@ export default function Contracts() {
               <td>{c.durationMonths} mo</td>
               <td>{c.status}</td>
               <td>{c.linesCount}</td>
-              <td>
-                <button onClick={() => openRenew(c)}>Renew</button>
-                {' '}
-                <button onClick={() => setConfirmId(c.id)}>Delete</button>
-              </td>
+              {admin && (
+                <td>
+                  <button onClick={() => openRenew(c)}>Renew</button>
+                  {' '}
+                  <button onClick={() => setConfirmId(c.id)}>Delete</button>
+                </td>
+              )}
             </tr>
           ))}
-          {currentData?.length === 0 && <tr><td colSpan={7}>No contracts found</td></tr>}
+          {currentData?.length === 0 && <tr><td colSpan={admin ? 7 : 6}>No contracts found</td></tr>}
         </tbody>
       </table>
 
-      {confirmId && (
+      {admin && confirmId && (
         <ConfirmDialog
           message="Delete this contract?"
           onConfirm={() => { deleteMut.mutate(confirmId); setConfirmId(null) }}

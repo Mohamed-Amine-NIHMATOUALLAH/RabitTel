@@ -13,6 +13,7 @@ import type {
   LoginRequest, LoginResponse,
   UserResponse, AdminCreateUserRequest, AdminUpdateUserRequest,
   UserUpdateRequest, ChangePasswordRequest, ForgotPasswordRequest,
+  NotificationResponse,
   Page,
 } from '../types'
 import { ContractStatus, LineStatus, LineType } from '../types'
@@ -233,4 +234,28 @@ export const vpn4GService = {
     api.patch(`/lines/4g-vpn/${id}/terminate`).then(() => undefined as void),
   delete: (id: string) =>
     api.delete(`/lines/4g-vpn/${id}`).then(() => undefined as void),
+}
+
+// ─── Notifications ────────────────────────────────────────────────────────────
+// Direct proxy to notification-service (port 8086)
+// Note: axios baseURL is already '/api', so we use '/v1/notifications' to avoid
+// doubling the '/api' prefix → final URL: /api/v1/notifications
+const NOTIF_BASE = '/v1/notifications'
+
+export const notificationService = {
+  /** All notifications (admin view) */
+  getAll: () =>
+    api.get<NotificationResponse[]>(NOTIF_BASE).then(d),
+
+  /** Notifications for a specific recipient (email or username) */
+  getByRecipient: (recipient: string) =>
+    api.get<NotificationResponse[]>(`${NOTIF_BASE}/recipient/${encodeURIComponent(recipient)}`).then(d),
+
+  /** Single notification by ID */
+  getById: (id: string) =>
+    api.get<NotificationResponse>(`${NOTIF_BASE}/${id}`).then(d),
+
+  /** Mark an IN_APP delivery as read */
+  markAsRead: (deliveryId: string) =>
+    api.patch<void>(`${NOTIF_BASE}/${deliveryId}/read`).then(() => undefined as void),
 }

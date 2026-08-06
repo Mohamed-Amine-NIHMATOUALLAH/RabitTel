@@ -8,6 +8,7 @@ import Plans from './pages/Plans'
 import Contracts from './pages/Contracts'
 import Users from './pages/Users'
 import Profile from './pages/Profile'
+import ChangePasswordForced from './pages/ChangePasswordForced'
 import FTTHLines from './pages/lines/FTTHLines'
 import RTCLines from './pages/lines/RTCLines'
 import VPNAdslLines from './pages/lines/DataLines'
@@ -18,11 +19,26 @@ import GSMLines from './pages/lines/GSMLines'
 import Internet4GLines from './pages/lines/Internet4GLines'
 import VPN4GLines from './pages/lines/VPN4GLines'
 import LinesOverview from './pages/lines/LinesOverview'
+import { useAuth, isAdmin } from './auth/AuthContext'
+
+/** Smart index: ADMIN → /dashboard, MEMBER → /lines */
+function HomeRedirect() {
+  const { user } = useAuth()
+  return <Navigate to={isAdmin(user) ? '/dashboard' : '/lines'} replace />
+}
 
 export const router = createBrowserRouter([
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/change-password-forced',
+    element: (
+      <ProtectedRoute>
+        <ChangePasswordForced />
+      </ProtectedRoute>
+    ),
   },
   {
     path: '/',
@@ -32,8 +48,15 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <Navigate to="/dashboard" replace /> },
-      { path: 'dashboard', element: <Dashboard /> },
+      { index: true, element: <HomeRedirect /> },
+      {
+        path: 'dashboard',
+        element: (
+          <ProtectedRoute adminOnly>
+            <Dashboard />
+          </ProtectedRoute>
+        ),
+      },
       {
         path: 'users',
         element: (
@@ -58,5 +81,5 @@ export const router = createBrowserRouter([
       { path: 'lines/4g-vpn', element: <VPN4GLines /> },
     ],
   },
-  { path: '*', element: <Navigate to="/dashboard" replace /> },
+  { path: '*', element: <Navigate to="/" replace /> },
 ])
