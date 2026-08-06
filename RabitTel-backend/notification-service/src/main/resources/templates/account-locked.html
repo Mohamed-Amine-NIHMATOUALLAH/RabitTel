@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Compte verrouillé</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f9;font-family:'Segoe UI',Arial,sans-serif;">
+
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f4f6f9;padding:40px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" cellpadding="0" cellspacing="0" width="600"
+                   style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.07);">
+
+                <!-- HEADER FRAGMENT -->
+                <tr>
+                    <td>
+                        <div th:replace="~{fragments/header :: header('Alerte de Sécurité')}"></div>
+                    </td>
+                </tr>
+
+                <!-- BODY -->
+                <tr>
+                    <td style="padding:40px 40px 8px;">
+
+                        <p style="margin:0 0 20px;font-size:16px;color:#333333;line-height:1.6;">
+                            Bonjour <strong th:text="${firstName != null} ? ${firstName} : 'Utilisateur'">Utilisateur</strong>,
+                        </p>
+
+                        <p style="margin:0 0 28px;font-size:15px;color:#555555;line-height:1.7;">
+                            Votre compte <strong>RabitTel</strong> a été temporairement verrouillé suite à plusieurs tentatives de connexion échouées.
+                        </p>
+
+                        <!-- Alert banner -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                               style="background:#fef2f2;border:1px solid #fecaca;border-radius:6px;margin-bottom:28px;">
+                            <tr>
+                                <td style="padding:16px 20px;">
+                                    <p style="margin:0;font-size:14px;color:#991b1b;font-weight:600;">
+                                        &#128683;&nbsp; L'accès à votre compte a été suspendu jusqu'à ce qu'un administrateur le déverrouille.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Details card -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                               style="background:#f9f9f9;border:1px solid #eeeeee;border-radius:6px;margin-bottom:28px;">
+                            <tr>
+                                <td style="padding:20px 24px;">
+                                    <p style="margin:0 0 14px;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;">
+                                        Informations du verrouillage
+                                    </p>
+                                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                        <tr>
+                                            <td style="padding:7px 0;border-bottom:1px solid #eeeeee;">
+                                                <span style="font-size:12px;color:#888;width:120px;display:inline-block;">Compte</span>
+                                                <span style="font-size:13px;font-weight:600;color:#333;"
+                                                      th:text="${email != null} ? ${email} : ''"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:7px 0;border-bottom:1px solid #eeeeee;">
+                                                <span style="font-size:12px;color:#888;width:120px;display:inline-block;">Verrouillé le</span>
+                                                <span style="font-size:13px;color:#333;"
+                                                      th:text="${lockedAt != null} ? ${lockedAt} : ''"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:7px 0;">
+                                                <span style="font-size:12px;color:#888;width:120px;display:inline-block;">Raison</span>
+                                                <span style="font-size:13px;color:#333;"
+                                                      th:text="${reason != null} ? ${reason} : 'Tentatives de connexion multiples échouées'">
+                                                    Tentatives de connexion multiples échouées
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <p style="margin:0 0 28px;font-size:14px;color:#555555;line-height:1.7;">
+                            Si c'était bien vous, veuillez contacter votre administrateur pour déverrouiller votre compte.
+                            Dans le cas contraire, votre compte est peut-être ciblé — informez immédiatement votre administrateur.
+                        </p>
+
+                        <!-- CTA button -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                               style="margin-bottom:32px;">
+                            <tr>
+                                <td align="center">
+                                    <a th:href="${supportUrl != null} ? ${supportUrl} : '#'"
+                                       style="display:inline-block;background:#7A3E00;color:#ffffff;text-decoration:none;padding:13px 36px;border-radius:5px;font-size:14px;font-weight:600;font-family:'Segoe UI',Arial,sans-serif;">
+                                        Contacter l'administrateur
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <!-- FOOTER FRAGMENT -->
+                <tr>
+                    <td style="padding:0 40px 40px;">
+                        <div th:replace="~{fragments/footer :: footer}"></div>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

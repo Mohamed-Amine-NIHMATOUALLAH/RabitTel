@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Compte déverrouillé</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f9;font-family:'Segoe UI',Arial,sans-serif;">
+
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f4f6f9;padding:40px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" cellpadding="0" cellspacing="0" width="600"
+                   style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.07);">
+
+                <!-- HEADER FRAGMENT -->
+                <tr>
+                    <td>
+                        <div th:replace="~{fragments/header :: header('Accès restauré')}"></div>
+                    </td>
+                </tr>
+
+                <!-- BODY -->
+                <tr>
+                    <td style="padding:40px 40px 8px;">
+
+                        <p style="margin:0 0 20px;font-size:16px;color:#333333;line-height:1.6;">
+                            Bonjour <strong th:text="${firstName != null} ? ${firstName} : 'Utilisateur'">Utilisateur</strong>,
+                        </p>
+
+                        <p style="margin:0 0 28px;font-size:15px;color:#555555;line-height:1.7;">
+                            Votre compte <strong>RabitTel</strong> a été déverrouillé par un administrateur.
+                            Vous pouvez désormais vous connecter à nouveau.
+                        </p>
+
+                        <!-- Success banner -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                               style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;margin-bottom:28px;">
+                            <tr>
+                                <td style="padding:16px 20px;">
+                                    <p style="margin:0;font-size:14px;color:#166534;font-weight:600;">
+                                        &#10003;&nbsp; L'accès à votre compte a été entièrement restauré.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Details card -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                               style="background:#f9f9f9;border:1px solid #eeeeee;border-radius:6px;margin-bottom:28px;">
+                            <tr>
+                                <td style="padding:20px 24px;">
+                                    <p style="margin:0 0 14px;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;">
+                                        Informations
+                                    </p>
+                                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                        <tr>
+                                            <td style="padding:7px 0;border-bottom:1px solid #eeeeee;">
+                                                <span style="font-size:12px;color:#888;width:130px;display:inline-block;">Compte</span>
+                                                <span style="font-size:13px;font-weight:600;color:#333;"
+                                                      th:text="${email != null} ? ${email} : ''"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:7px 0;border-bottom:1px solid #eeeeee;">
+                                                <span style="font-size:12px;color:#888;width:130px;display:inline-block;">Déverrouillé le</span>
+                                                <span style="font-size:13px;color:#333;"
+                                                      th:text="${unlockedAt != null} ? ${unlockedAt} : ''"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:7px 0;">
+                                                <span style="font-size:12px;color:#888;width:130px;display:inline-block;">Déverrouillé par</span>
+                                                <span style="font-size:13px;color:#333;"
+                                                      th:text="${unlockedBy != null} ? ${unlockedBy} : 'Administrateur'">Administrateur</span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Security tip -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                               style="background:#fff8e1;border-left:4px solid #C58A2A;border-radius:0 4px 4px 0;margin-bottom:32px;">
+                            <tr>
+                                <td style="padding:14px 18px;">
+                                    <p style="margin:0;font-size:13px;color:#795548;line-height:1.6;">
+                                        &#128161;&nbsp;<strong>Conseil de sécurité :</strong>
+                                        Nous vous recommandons de modifier votre mot de passe et de sécuriser votre compte lors de votre prochaine connexion.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- CTA button -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                               style="margin-bottom:32px;">
+                            <tr>
+                                <td align="center">
+                                    <a th:href="${loginUrl != null} ? ${loginUrl} : '#'"
+                                       style="display:inline-block;background:#e65100;color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:5px;font-size:15px;font-weight:600;font-family:'Segoe UI',Arial,sans-serif;">
+                                        Se connecter maintenant
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <!-- FOOTER FRAGMENT -->
+                <tr>
+                    <td style="padding:0 40px 40px;">
+                        <div th:replace="~{fragments/footer :: footer}"></div>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>

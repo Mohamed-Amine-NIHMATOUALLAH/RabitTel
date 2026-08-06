@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Welcome to RabitTel</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f4f6f9;font-family:'Segoe UI',Arial,sans-serif;">
+
+<table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#f4f6f9;padding:40px 0;">
+    <tr>
+        <td align="center">
+            <table role="presentation" cellpadding="0" cellspacing="0" width="600"
+                   style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.07);">
+
+                <!-- HEADER FRAGMENT -->
+                <tr>
+                    <td>
+                        <div th:replace="~{fragments/header :: header('Bienvenue sur RabitTel')}"></div>
+                    </td>
+                </tr>
+
+                <!-- BODY -->
+                <tr>
+                    <td style="padding:40px 40px 8px;">
+
+                        <!-- Greeting -->
+                        <p style="margin:0 0 20px;font-size:16px;color:#333333;line-height:1.6;">
+                            Bonjour <strong th:text="${firstName != null} ? ${firstName} : 'Utilisateur'">Utilisateur</strong>,
+                        </p>
+
+                        <p style="margin:0 0 28px;font-size:15px;color:#555555;line-height:1.7;">
+                            Votre compte <strong>RabitTel Enterprise Platform</strong> a été créé avec succès.
+                            Vous trouverez ci-dessous vos identifiants de connexion temporaires.
+                        </p>
+
+                        <!-- Credentials card -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                               style="background:#fdf8f2;border:1px solid #e8d5b0;border-radius:6px;margin-bottom:28px;">
+                            <tr>
+                                <td style="padding:24px 28px;">
+                                    <p style="margin:0 0 6px;font-size:11px;font-weight:700;color:#C58A2A;text-transform:uppercase;letter-spacing:1px;">
+                                        Identifiants de connexion
+                                    </p>
+                                    <div style="width:32px;height:2px;background:#C58A2A;border-radius:2px;margin-bottom:18px;"></div>
+
+                                    <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                        <tr>
+                                            <td style="padding:8px 0;border-bottom:1px solid #eee7d9;">
+                                                <span style="font-size:12px;color:#888;display:block;margin-bottom:2px;">Email</span>
+                                                <span style="font-size:14px;font-weight:600;color:#333333;"
+                                                      th:text="${email != null} ? ${email} : ''"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:8px 0;border-bottom:1px solid #eee7d9;">
+                                                <span style="font-size:12px;color:#888;display:block;margin-bottom:2px;">Nom d'utilisateur</span>
+                                                <span style="font-size:14px;font-weight:600;color:#333333;"
+                                                      th:text="${username != null} ? ${username} : ''"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="padding:8px 0;">
+                                                <span style="font-size:12px;color:#888;display:block;margin-bottom:2px;">Mot de passe temporaire</span>
+                                                <span style="font-size:16px;font-weight:700;color:#7A3E00;letter-spacing:2px;font-family:monospace;"
+                                                      th:text="${temporaryPassword != null} ? ${temporaryPassword} : ''"></span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- Important notice -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                               style="background:#fff8e1;border-left:4px solid #C58A2A;border-radius:0 4px 4px 0;margin-bottom:32px;">
+                            <tr>
+                                <td style="padding:14px 18px;">
+                                    <p style="margin:0;font-size:13px;color:#795548;line-height:1.6;">
+                                        &#9888;&nbsp;<strong>Important :</strong>
+                                        Ce mot de passe est temporaire. Vous serez invité à le modifier lors de votre première connexion.
+                                    </p>
+                                </td>
+                            </tr>
+                        </table>
+
+                        <!-- CTA button -->
+                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%"
+                               style="margin-bottom:32px;">
+                            <tr>
+                                <td align="center">
+                                    <a th:href="${loginUrl != null} ? ${loginUrl} : '#'"
+                                       style="display:inline-block;background:#e65100;color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:5px;font-size:15px;font-weight:600;font-family:'Segoe UI',Arial,sans-serif;">
+                                        Se connecter à RabitTel
+                                    </a>
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+
+                <!-- FOOTER FRAGMENT -->
+                <tr>
+                    <td style="padding:0 40px 40px;">
+                        <div th:replace="~{fragments/footer :: footer}"></div>
+                    </td>
+                </tr>
+
+            </table>
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
