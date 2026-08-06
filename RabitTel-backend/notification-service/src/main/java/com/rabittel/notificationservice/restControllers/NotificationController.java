@@ -1,4 +1,4 @@
-package com.rabittel.notificationservice.controller;
+package com.rabittel.notificationservice.restControllers;
 
 import com.rabittel.notificationservice.dtos.request.NotificationRequestDTO;
 import com.rabittel.notificationservice.dtos.response.ApiErrorResponse;
